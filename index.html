@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Watchlist</title>
+<link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;
+  --glass:rgba(255,255,255,0.04);
+  --glass-border:rgba(255,255,255,0.08);
+  --glass-hover:rgba(255,255,255,0.07);
+  --accent:#c084fc;
+  --accent2:#818cf8;
+  --gold:#fbbf24;
+  --teal:#2dd4bf;
+  --text:#e2e8f0;
+  --muted:#64748b;
+}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+#bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#bg-scene svg{width:100%;height:100%}
+.star{animation:twinkle 3s infinite alternate}
+@keyframes twinkle{0%{opacity:.15}100%{opacity:.55}}
+#app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+header{text-align:center;margin-bottom:2.5rem;animation:fadeDown .6s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+header h1{
+  font-family:'Philosopher',serif;
+  font-size:clamp(32px,6vw,52px);
+  font-weight:700;
+  font-style:italic;
+  background:linear-gradient(135deg,#e0aaff,#c084fc,#a78bfa,#7dd3fc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:.04em;
+}
+
+.who-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:14px;padding:10px 16px;margin-bottom:1.5rem;
+  backdrop-filter:blur(12px);animation:fadeUp .5s .1s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.who-bar span{font-size:13px;color:var(--muted)}
+.who-bar input{
+  padding:5px 10px;background:rgba(255,255,255,0.05);
+  border:1px solid var(--glass-border);border-radius:8px;
+  color:var(--text);font-size:13px;font-family:'Nunito',sans-serif;width:140px;
+}
+.who-bar input:focus{outline:1px solid var(--accent);outline-offset:1px}
+#nameDisplay{font-size:13px;color:var(--accent);font-weight:600}
+
+.add-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp .5s .15s ease both}
+.add-bar input,.add-bar select{
+  padding:10px 12px;background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text);font-size:14px;font-family:'Nunito',sans-serif;
+  backdrop-filter:blur(8px);transition:border-color .2s;
+}
+.add-bar input:focus,.add-bar select:focus{outline:none;border-color:var(--accent)}
+.add-bar select option{background:#1a1a2e}
+.add-bar .title-inp{flex:1;min-width:160px}
+.add-bar .type-sel{width:120px}
+.add-bar .num-inp{width:90px}
+.btn-add{
+  padding:10px 20px;
+  background:linear-gradient(135deg,#a855f7,#818cf8);
+  border:none;border-radius:10px;color:#fff;
+  font-size:14px;font-weight:600;font-family:'Nunito',sans-serif;
+  cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s;
+}
+.btn-add:hover{opacity:.85}
+.btn-add:active{transform:scale(.97)}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp .5s .2s ease both}
+.fbtn{
+  padding:5px 14px;border:1px solid var(--glass-border);border-radius:20px;
+  background:transparent;color:var(--muted);font-size:12px;font-family:'Nunito',sans-serif;
+  cursor:pointer;transition:all .15s;
+}
+.fbtn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.fbtn.active{background:rgba(168,85,247,.15);border-color:var(--accent);color:var(--accent)}
+
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp .5s .22s ease both}
+.stat{
+  flex:1;min-width:80px;background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:12px;padding:10px 14px;text-align:center;backdrop-filter:blur(10px);
+}
+.stat-n{font-size:24px;font-weight:700;color:#fff;font-family:'Philosopher',serif}
+.stat-l{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.card{
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;
+  padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:13px;
+  backdrop-filter:blur(14px);transition:border-color .2s,background .2s,transform .15s;
+  animation:fadeUp .4s ease both;
+}
+.card:hover{border-color:rgba(255,255,255,.13);background:var(--glass-hover);transform:translateY(-1px)}
+.card.done{opacity:.5}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.dot-pending{background:var(--muted)}
+.dot-watching{background:var(--gold);box-shadow:0 0 8px rgba(251,191,36,.5)}
+.dot-done{background:var(--teal);box-shadow:0 0 8px rgba(45,212,191,.4)}
+
+.card-info{flex:1;min-width:0}
+.card-title{
+  font-family:'Philosopher',serif;
+  font-size:15px;font-weight:700;color:#fff;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;
+}
+.badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;font-family:'Nunito',sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.badge.serie{background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.3)}
+.badge.pelicula{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
+.badge.anime{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
+.badge.libro{background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.25)}
+
+.card-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.added-tag{color:rgba(192,132,252,.55)}
+.progress-bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#a855f7,#2dd4bf);border-radius:2px;transition:width .4s ease}
+
+.card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.btn-sm{
+  padding:3px 11px;font-size:12px;font-family:'Nunito',sans-serif;
+  border:1px solid var(--glass-border);border-radius:7px;
+  background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.btn-sm:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.btn-sm.blue{border-color:rgba(129,140,248,.4);color:var(--accent2)}
+.btn-sm.blue:hover{background:rgba(129,140,248,.12)}
+.btn-sm.green{border-color:rgba(45,212,191,.35);color:var(--teal)}
+.btn-sm.green:hover{background:rgba(45,212,191,.1)}
+.btn-sm.red{border-color:rgba(248,113,113,.3);color:#f87171}
+.btn-sm.red:hover{background:rgba(248,113,113,.1)}
+
+.inline-edit{display:flex;gap:8px;align-items:center}
+.inline-edit label{font-size:12px;color:var(--muted)}
+.inline-edit input{
+  width:75px;padding:3px 8px;background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-border);border-radius:7px;
+  color:var(--text);font-size:13px;font-family:'Nunito',sans-serif;
+}
+.inline-edit input:focus{outline:none;border-color:var(--accent)}
+.inline-edit span{font-size:12px;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:4rem 0}
+.sync{font-size:11px;color:var(--muted);text-align:right;margin-bottom:.75rem}
+.sync.ok{color:rgba(45,212,191,.6)}
+.sync.err{color:rgba(248,113,113,.6)}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+@media(max-width:500px){.add-bar{flex-direction:column}.add-bar .type-sel,.add-bar .num-inp{width:100%}}
+</style>
+</head>
+<body>
+
+<div id="bg-scene">
+<svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g1" cx="20%" cy="20%"><stop offset="0%" stop-color="#c084fc" stop-opacity=".18"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <radialGradient id="g2" cx="80%" cy="80%"><stop offset="0%" stop-color="#818cf8" stop-opacity=".15"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <radialGradient id="g3" cx="50%" cy="50%"><stop offset="0%" stop-color="#2dd4bf" stop-opacity=".1"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+  </defs>
+  <rect width="1440" height="900" fill="#07090f"/>
+  <ellipse cx="200" cy="200" rx="500" ry="400" fill="url(#g1)"/>
+  <ellipse cx="1300" cy="750" rx="450" ry="350" fill="url(#g2)"/>
+  <ellipse cx="720" cy="450" rx="300" ry="300" fill="url(#g3)"/>
+
+  <!-- stars -->
+  <g fill="#fff">
+    <circle class="star" cx="120" cy="80" r="1" style="animation-delay:0s"/>
+    <circle class="star" cx="340" cy="150" r="1.2" style="animation-delay:.5s"/>
+    <circle class="star" cx="600" cy="60" r=".8" style="animation-delay:1s"/>
+    <circle class="star" cx="900" cy="120" r="1.1" style="animation-delay:1.5s"/>
+    <circle class="star" cx="1100" cy="80" r=".9" style="animation-delay:.8s"/>
+    <circle class="star" cx="1300" cy="200" r="1.3" style="animation-delay:.3s"/>
+    <circle class="star" cx="80" cy="400" r=".7" style="animation-delay:2s"/>
+    <circle class="star" cx="1400" cy="350" r="1" style="animation-delay:1.2s"/>
+    <circle class="star" cx="500" cy="700" r=".9" style="animation-delay:.6s"/>
+    <circle class="star" cx="1200" cy="600" r="1.1" style="animation-delay:1.8s"/>
+    <circle class="star" cx="760" cy="800" r=".8" style="animation-delay:.4s"/>
+    <circle class="star" cx="200" cy="750" r="1" style="animation-delay:2.2s"/>
+    <circle class="star" cx="460" cy="300" r=".9" style="animation-delay:1.1s"/>
+    <circle class="star" cx="1050" cy="450" r=".7" style="animation-delay:2.5s"/>
+  </g>
+
+  <!-- Film strip left -->
+  <g opacity=".045" transform="translate(40,280) rotate(-10)">
+    <rect x="0" y="0" width="190" height="130" rx="4" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+    <rect x="-10" y="15" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="-10" y="40" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="-10" y="65" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="-10" y="90" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="192" y="15" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="192" y="40" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="192" y="65" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="192" y="90" width="8" height="14" rx="2" fill="#a855f7"/>
+    <rect x="12" y="12" width="50" height="46" rx="2" fill="#a855f7" opacity=".3"/>
+    <rect x="70" y="12" width="50" height="46" rx="2" fill="#818cf8" opacity=".25"/>
+    <rect x="128" y="12" width="50" height="46" rx="2" fill="#7dd3fc" opacity=".2"/>
+    <rect x="12" y="66" width="50" height="46" rx="2" fill="#818cf8" opacity=".2"/>
+    <rect x="70" y="66" width="50" height="46" rx="2" fill="#a855f7" opacity=".25"/>
+    <rect x="128" y="66" width="50" height="46" rx="2" fill="#2dd4bf" opacity=".2"/>
+  </g>
+
+  <!-- Large film strip right -->
+  <g opacity=".035" transform="translate(1180,80) rotate(7)">
+    <rect x="0" y="0" width="210" height="300" rx="4" fill="none" stroke="#818cf8" stroke-width="2"/>
+    <rect x="-12" y="18" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="50" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="82" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="114" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="146" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="178" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="210" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="-12" y="242" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="18" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="50" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="82" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="114" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="146" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="178" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="210" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="212" y="242" width="10" height="18" rx="2" fill="#818cf8"/>
+    <rect x="14" y="12" width="182" height="88" rx="3" fill="#a855f7" opacity=".35"/>
+    <rect x="14" y="108" width="182" height="88" rx="3" fill="#818cf8" opacity=".28"/>
+    <rect x="14" y="204" width="182" height="84" rx="3" fill="#2dd4bf" opacity=".22"/>
+  </g>
+
+  <!-- Anime eye 1 -->
+  <g opacity=".055" transform="translate(1060,580)">
+    <ellipse cx="0" cy="0" rx="58" ry="74" fill="none" stroke="#c084fc" stroke-width="1.5"/>
+    <ellipse cx="0" cy="0" rx="36" ry="46" fill="#a855f7" opacity=".5"/>
+    <ellipse cx="0" cy="0" rx="16" ry="20" fill="#07090f"/>
+    <ellipse cx="-9" cy="-11" rx="7" ry="8" fill="#fff" opacity=".9"/>
+    <ellipse cx="7" cy="7" rx="3" ry="4" fill="#fff" opacity=".45"/>
+    <!-- lashes -->
+    <line x1="-35" y1="-55" x2="-28" y2="-46" stroke="#c084fc" stroke-width="1.5"/>
+    <line x1="-15" y1="-68" x2="-12" y2="-57" stroke="#c084fc" stroke-width="1.5"/>
+    <line x1="8" y1="-70" x2="6" y2="-58" stroke="#c084fc" stroke-width="1.5"/>
+    <line x1="28" y1="-62" x2="24" y2="-51" stroke="#c084fc" stroke-width="1.5"/>
+    <line x1="44" y1="-46" x2="37" y2="-38" stroke="#c084fc" stroke-width="1.5"/>
+  </g>
+
+  <!-- Anime eye 2 small -->
+  <g opacity=".04" transform="translate(350,660)">
+    <ellipse cx="0" cy="0" rx="42" ry="54" fill="none" stroke="#818cf8" stroke-width="1.2"/>
+    <ellipse cx="0" cy="0" rx="26" ry="34" fill="#818cf8" opacity=".4"/>
+    <ellipse cx="0" cy="0" rx="11" ry="15" fill="#07090f"/>
+    <ellipse cx="-6" cy="-8" rx="5" ry="6" fill="#fff" opacity=".9"/>
+    <line x1="-26" y1="-40" x2="-20" y2="-33" stroke="#818cf8" stroke-width="1.2"/>
+    <line x1="-8" y1="-50" x2="-6" y2="-41" stroke="#818cf8" stroke-width="1.2"/>
+    <line x1="10" y1="-50" x2="8" y2="-41" stroke="#818cf8" stroke-width="1.2"/>
+    <line x1="26" y1="-42" x2="22" y2="-34" stroke="#818cf8" stroke-width="1.2"/>
+  </g>
+
+  <!-- Moon crescent mystical -->
+  <g opacity=".05" transform="translate(680,60)">
+    <circle cx="0" cy="0" r="46" fill="#fbbf24" opacity=".6"/>
+    <circle cx="18" cy="-10" r="38" fill="#07090f"/>
+    <!-- stars around moon -->
+    <circle cx="-50" cy="-20" r="2.5" fill="#fbbf24"/>
+    <circle cx="-60" cy="10" r="1.5" fill="#fbbf24"/>
+    <circle cx="40" cy="-40" r="2" fill="#fbbf24"/>
+    <circle cx="55" cy="5" r="1.5" fill="#fbbf24"/>
+  </g>
+
+  <!-- Magic circle -->
+  <g opacity=".04" transform="translate(1350,430)">
+    <circle cx="0" cy="0" r="65" fill="none" stroke="#a855f7" stroke-width="1"/>
+    <circle cx="0" cy="0" r="50" fill="none" stroke="#818cf8" stroke-width=".8"/>
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#a855f7" stroke-width=".6"/>
+    <polygon points="0,-60 57,30 -57,30" fill="none" stroke="#818cf8" stroke-width=".8"/>
+    <polygon points="0,60 57,-30 -57,-30" fill="none" stroke="#818cf8" stroke-width=".8"/>
+  </g>
+
+  <!-- Magic circle 2 small -->
+  <g opacity=".035" transform="translate(90,150)">
+    <circle cx="0" cy="0" r="40" fill="none" stroke="#2dd4bf" stroke-width="1"/>
+    <circle cx="0" cy="0" r="28" fill="none" stroke="#818cf8" stroke-width=".8"/>
+    <polygon points="0,-36 34,18 -34,18" fill="none" stroke="#2dd4bf" stroke-width=".8"/>
+    <polygon points="0,36 34,-18 -34,-18" fill="none" stroke="#2dd4bf" stroke-width=".8"/>
+  </g>
+
+  <!-- Play button -->
+  <g opacity=".04" transform="translate(680,820)">
+    <circle cx="0" cy="0" r="44" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="34" fill="#fbbf24" opacity=".12"/>
+    <polygon points="14,-18 14,18 -14,0" fill="#fbbf24" opacity=".7"/>
+  </g>
+
+  <!-- Book/manga -->
+  <g opacity=".04" transform="translate(1310,680) rotate(-5)">
+    <rect x="0" y="0" width="85" height="112" rx="3" fill="#2dd4bf" opacity=".6"/>
+    <line x1="42" y1="0" x2="42" y2="112" stroke="#07090f" stroke-width="2"/>
+    <line x1="8" y1="22" x2="37" y2="22" stroke="#07090f" stroke-width="1.2"/>
+    <line x1="8" y1="35" x2="37" y2="35" stroke="#07090f" stroke-width=".8"/>
+    <line x1="8" y1="48" x2="32" y2="48" stroke="#07090f" stroke-width=".8"/>
+    <line x1="47" y1="22" x2="77" y2="22" stroke="#07090f" stroke-width="1.2"/>
+    <line x1="47" y1="35" x2="77" y2="35" stroke="#07090f" stroke-width=".8"/>
+    <rect x="8" y="62" width="28" height="36" rx="2" fill="#07090f" opacity=".35"/>
+    <rect x="47" y="62" width="28" height="36" rx="2" fill="#07090f" opacity=".28"/>
+  </g>
+
+  <!-- Sparkles -->
+  <g fill="#c084fc" opacity=".1">
+    <polygon points="730,44 733,37 736,44 743,44 737,49 740,56 733,51 726,56 729,49 723,44"/>
+    <polygon points="95,545 97,540 99,545 104,545 100,548 102,553 97,550 92,553 94,548 90,545"/>
+    <polygon points="1385,295 1387,290 1389,295 1394,295 1390,298 1392,303 1387,300 1382,303 1384,298 1380,295"/>
+    <polygon points="450,180 452,175 454,180 459,180 455,183 457,188 452,185 447,188 449,183 445,180"/>
+  </g>
+
+  <!-- speed lines manga -->
+  <g opacity=".02" stroke="#818cf8" stroke-width="1">
+    <line x1="0" y1="900" x2="180" y2="620"/>
+    <line x1="25" y1="900" x2="205" y2="620"/>
+    <line x1="50" y1="900" x2="230" y2="620"/>
+    <line x1="1440" y1="0" x2="1260" y2="280"/>
+    <line x1="1415" y1="0" x2="1235" y2="280"/>
+    <line x1="1390" y1="0" x2="1210" y2="280"/>
+  </g>
+
+  <!-- Clapper board -->
+  <g opacity=".04" transform="translate(195,105) rotate(8)">
+    <rect x="0" y="20" width="95" height="65" rx="3" fill="#fbbf24" opacity=".5"/>
+    <rect x="0" y="0" width="95" height="24" rx="3" fill="#fbbf24" opacity=".4"/>
+    <rect x="8" y="0" width="11" height="24" fill="#07090f" opacity=".5"/>
+    <rect x="30" y="0" width="11" height="24" fill="#07090f" opacity=".5"/>
+    <rect x="52" y="0" width="11" height="24" fill="#07090f" opacity=".5"/>
+    <rect x="74" y="0" width="11" height="24" fill="#07090f" opacity=".5"/>
+    <line x1="8" y1="36" x2="87" y2="36" stroke="#07090f" stroke-width="1.2" opacity=".35"/>
+    <line x1="8" y1="50" x2="87" y2="50" stroke="#07090f" stroke-width="1.2" opacity=".35"/>
+    <line x1="8" y1="64" x2="87" y2="64" stroke="#07090f" stroke-width="1.2" opacity=".35"/>
+  </g>
+</svg>
+</div>
+
+<div id="app">
+  <header>
+    <h1>Watchlist</h1>
+  </header>
+
+  <div class="who-bar">
+    <span>Eres:</span>
+    <input type="text" id="nameInput" placeholder="Tu nombre..." />
+    <button class="btn-sm blue" onclick="saveName()">Guardar</button>
+    <span id="nameDisplay"></span>
+  </div>
+
+  <div class="add-bar">
+    <input class="title-inp" type="text" id="newTitle" placeholder="Título..." />
+    <select class="type-sel" id="newType">
+      <option value="serie">📺 Serie</option>
+      <option value="pelicula">🎬 Película</option>
+      <option value="anime">⚡ Anime</option>
+      <option value="libro">📖 Libro</option>
+    </select>
+    <input class="num-inp" type="number" id="newTotal" placeholder="Eps / págs" min="1"/>
+    <button class="btn-add" onclick="addItem()">+ Agregar</button>
+  </div>
+
+  <div class="filters">
+    <button class="fbtn active" onclick="setFilter('all',this)">Todos</button>
+    <button class="fbtn" onclick="setFilter('pending',this)">Pendiente</button>
+    <button class="fbtn" onclick="setFilter('watching',this)">Viendo</button>
+    <button class="fbtn" onclick="setFilter('done',this)">Terminado</button>
+    <button class="fbtn" onclick="setFilter('serie',this)">Series</button>
+    <button class="fbtn" onclick="setFilter('pelicula',this)">Películas</button>
+    <button class="fbtn" onclick="setFilter('anime',this)">Anime</button>
+    <button class="fbtn" onclick="setFilter('libro',this)">Libros</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="sync" id="syncStatus">Conectando...</div>
+  <div id="list"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// =============================================
+//  PEGA AQUI TU CONFIG DE FIREBASE
+// =============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAlGAHZxlQm0gGVdpInRxORLW4plhRo9v4",
+  authDomain: "nanayyo-bd393.firebaseapp.com",
+  databaseURL: "https://nanayyo-bd393-default-rtdb.firebaseio.com",
+  projectId: "nanayyo-bd393",
+  storageBucket: "nanayyo-bd393.firebasestorage.app",
+  messagingSenderId: "465841132382",
+  appId: "1:465841132382:web:fa1f9826a7c06bd98635cf"
+};
+// =============================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ref = db.ref('watchlist');
+
+let items={}, filter='all';
+let myName=localStorage.getItem('wl_name')||'';
+
+if(myName){
+  document.getElementById('nameDisplay').textContent='✦ '+myName;
+  document.getElementById('nameInput').placeholder=myName;
+}
+
+function saveName(){
+  const v=document.getElementById('nameInput').value.trim();
+  if(!v)return;
+  myName=v;localStorage.setItem('wl_name',v);
+  document.getElementById('nameDisplay').textContent='✦ '+v;
+  document.getElementById('nameInput').value='';
+}
+
+ref.on('value',snap=>{
+  items=snap.val()||{};
+  document.getElementById('syncStatus').textContent='● Sincronizado';
+  document.getElementById('syncStatus').className='sync ok';
+  render();
+},()=>{
+  document.getElementById('syncStatus').textContent='● Sin conexión';
+  document.getElementById('syncStatus').className='sync err';
+});
+
+function addItem(){
+  const title=document.getElementById('newTitle').value.trim();
+  if(!title)return;
+  const id=Date.now().toString();
+  ref.child(id).set({id,title,
+    type:document.getElementById('newType').value,
+    total:parseInt(document.getElementById('newTotal').value)||null,
+    current:0,status:'pending',
+    addedBy:myName||'Anon',ts:id});
+  document.getElementById('newTitle').value='';
+  document.getElementById('newTotal').value='';
+}
+
+function deleteItem(id){
+  if(!confirm('¿Eliminar "'+( items[id]?.title||'')+'"?'))return;
+  ref.child(id).remove();
+}
+function setStatus(id,status){
+  const upd={status};
+  if(status==='done'&&items[id]?.total)upd.current=items[id].total;
+  ref.child(id).update(upd);
+}
+function updateProgress(id,val){
+  const v=parseInt(val)||0,item=items[id];
+  if(!item)return;
+  const upd={current:v};
+  if(item.total&&v>=item.total)upd.status='done';
+  else if(v>0)upd.status='watching';
+  else upd.status='pending';
+  ref.child(id).update(upd);
+}
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');render();
+}
+
+const statusLbl={pending:'Pendiente',watching:'Viendo',done:'Terminado ✓'};
+const dotCls={pending:'dot-pending',watching:'dot-watching',done:'dot-done'};
+const unitLbl={libro:'pág',serie:'ep',anime:'ep',pelicula:'min'};
+const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖'};
+
+function render(){
+  const all=Object.values(items).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  let list=all;
+  if(filter==='pending')list=all.filter(i=>i.status==='pending');
+  else if(filter==='watching')list=all.filter(i=>i.status==='watching');
+  else if(filter==='done')list=all.filter(i=>i.status==='done');
+  else if(['serie','pelicula','anime','libro'].includes(filter))list=all.filter(i=>i.type===filter);
+
+  const done=all.filter(i=>i.status==='done').length;
+  const watching=all.filter(i=>i.status==='watching').length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-n">${all.length}</div><div class="stat-l">Total</div></div>
+    <div class="stat"><div class="stat-n">${watching}</div><div class="stat-l">Viendo</div></div>
+    <div class="stat"><div class="stat-n">${done}</div><div class="stat-l">Terminados</div></div>
+    <div class="stat"><div class="stat-n">${all.length-done}</div><div class="stat-l">Pendientes</div></div>
+  `;
+  if(!list.length){
+    document.getElementById('list').innerHTML='<div class="empty">✨ Nada aquí todavía</div>';return;
+  }
+  document.getElementById('list').innerHTML=list.map((item,i)=>{
+    const pct=item.total?Math.min(100,Math.round(item.current/item.total*100)):0;
+    const unit=unitLbl[item.type]||'ep';
+    return `<div class="card ${item.status==='done'?'done':''}" style="animation-delay:${i*.04}s">
+      <div class="dot ${dotCls[item.status]||'dot-pending'}"></div>
+      <div class="card-info">
+        <div class="card-title">
+          <span>${item.title}</span>
+          <span class="badge ${item.type}">${typeEmoji[item.type]||''} ${item.type}</span>
+        </div>
+        <div class="card-meta">
+          <span>${statusLbl[item.status]||item.status}</span>
+          ${item.total?`<span>${item.current}/${item.total} ${unit}</span>`:item.current?`<span>${item.current} ${unit}</span>`:''}
+          ${item.addedBy?`<span class="added-tag">por ${item.addedBy}</span>`:''}
+          ${item.total&&item.current>0?`<span>${pct}%</span>`:''}
+        </div>
+        ${item.total&&item.current>0?`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`:''}
+        <div class="card-actions">
+          ${item.status!=='watching'&&item.status!=='done'?`<button class="btn-sm blue" onclick="setStatus('${item.id}','watching')">▶ Empezar</button>`:''}
+          ${item.status!=='done'?`<button class="btn-sm green" onclick="setStatus('${item.id}','done')">✓ Terminado</button>`:''}
+          ${item.status==='done'?`<button class="btn-sm" onclick="setStatus('${item.id}','watching')">↺ Reanudar</button>`:''}
+          <button class="btn-sm red" onclick="deleteItem('${item.id}')">✕</button>
+        </div>
+        <div class="inline-edit">
+          <label>${item.type==='libro'?'Página':'Episodio/min'}:</label>
+          <input type="number" min="0" value="${item.current||0}" onchange="updateProgress('${item.id}',this.value)"/>
+          ${item.total?`<span>/ ${item.total}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});
+</script>
+</body>
+</html>
