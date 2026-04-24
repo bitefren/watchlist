@@ -337,7 +337,7 @@ function addItem(){
   const id=Date.now().toString();
   ref.child(id).set({id,title,
     type:document.getElementById('newType').value,
-    total:parseInt(document.getElementById('newTotal').value)||null,
+    total:null,
     ep:0, min:0, status:'pending',
     addedBy:myName||'Anon', ts:id,
     stars:0, note:'', doneDate:null
