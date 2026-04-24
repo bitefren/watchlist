@@ -80,7 +80,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .badge.anime{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
 .badge.libro{background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.25)}
 
-.card-meta{font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.card-meta{font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
 .added-tag{color:rgba(192,132,252,.55)}
 .done-date{color:rgba(45,212,191,.5);font-size:12px}
 
@@ -499,7 +499,7 @@ function render(){
         <div class="card-meta">
           <span>${statusLbl[item.status]||item.status}</span>
           ${progLbl?`<span>${progLbl}</span>`:''}
-          ${item.addedBy?`<span class="added-tag">por ${item.addedBy}</span>`:''}
+          
           ${item.doneDate?`<span class="done-date">✓ ${item.doneDate}</span>`:''}
           ${pct>0?`<span>${pct}%</span>`:''}
         </div>
