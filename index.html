@@ -316,18 +316,26 @@ ref.on('value',snap=>{
 const posterCache={};
 async function fetchPoster(title,type){
   if(posterCache[title]!==undefined) return posterCache[title];
-  posterCache[title]=null; // prevent duplicate requests
+  posterCache[title]=null;
   try{
     const q=encodeURIComponent(title);
-    const mediaType=type==='pelicula'?'movie':type==='libro'?'book':'tv';
-    const url=`https://api.themoviedb.org/3/search/${mediaType==='book'?'movie':mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=es`;
-    const r=await fetch(url);
-    const d=await r.json();
-    const poster=d.results?.[0]?.poster_path;
-    if(poster){
-      posterCache[title]='https://image.tmdb.org/t/p/w92'+poster;
-      // re-render to show poster
-      render();
+    if(type==='libro'){
+      const r=await fetch(`https://openlibrary.org/search.json?title=${q}&limit=1&fields=cover_i`);
+      const d=await r.json();
+      const coverId=d.docs?.[0]?.cover_i;
+      if(coverId){
+        posterCache[title]=`https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
+        render();
+      }
+    } else {
+      const mediaType=type==='pelicula'?'movie':'tv';
+      const r=await fetch(`https://api.themoviedb.org/3/search/${mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=es`);
+      const d=await r.json();
+      const poster=d.results?.[0]?.poster_path;
+      if(poster){
+        posterCache[title]='https://image.tmdb.org/t/p/w92'+poster;
+        render();
+      }
     }
   }catch(e){}
   return posterCache[title]||null;
