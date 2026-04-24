@@ -85,7 +85,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .done-date{color:rgba(45,212,191,.5);font-size:12px}
 
 .stars-display{display:flex;gap:2px;margin-bottom:6px}
-.star-icon{font-size:14px;cursor:pointer;transition:transform .1s;opacity:.3}
+.star-icon{font-size:16px;cursor:pointer;transition:transform .1s;opacity:.3}
 .star-icon.lit{opacity:1}
 .star-icon:hover{transform:scale(1.2)}
 
@@ -111,7 +111,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .pf-group input:focus{outline:none;border-color:var(--accent)}
 .pf-group span{font-size:13px;color:var(--muted)}
 
-.note-field{width:100%;padding:5px 10px;background:rgba(255,255,255,.03);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Nunito',sans-serif;resize:none;margin-bottom:4px}
+.note-field{width:100%;padding:5px 10px;background:rgba(255,255,255,.03);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Nunito',sans-serif;resize:vertical;min-height:32px;margin-bottom:4px}
 .note-field:focus{outline:none;border-color:var(--accent)}
 .note-display{font-size:13px;color:rgba(255,255,255,.4);font-style:italic;margin-bottom:6px}
 
@@ -119,9 +119,13 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .sync{font-size:11px;color:var(--muted);text-align:right;margin-bottom:.75rem}
 .sync.ok{color:rgba(45,212,191,.6)}
 .sync.err{color:rgba(248,113,113,.6)}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4);color:#e0aaff;padding:10px 22px;border-radius:12px;font-size:14px;font-family:'Nunito',sans-serif;backdrop-filter:blur(12px);opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
-@media(max-width:500px){.add-bar{flex-direction:column}.add-bar .type-sel,.add-bar .num-inp{width:100%}}
+@media(max-width:600px){.add-bar{flex-direction:column}.add-bar .type-sel{width:100%}.toolbar{flex-direction:column;align-items:flex-start}.btn-surprise{width:100%}.sort-sel{width:100%}}
 </style>
 </head>
 <body>
@@ -242,8 +246,8 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 
   <div class="who-bar">
     <span>Eres:</span>
-    <button class="btn-sm blue" onclick="quickName('Miau')">Miau</button>
-    <button class="btn-sm blue" onclick="quickName('Nana')">Nana</button>
+    <button class="btn-sm blue" id="btn-Miau" onclick="quickName('Miau')">Miau</button>
+    <button class="btn-sm blue" id="btn-Nana" onclick="quickName('Nana')">Nana</button>
     <span id="nameDisplay"></span>
   </div>
 
@@ -306,20 +310,29 @@ let items={}, filter='all', highlightId=null;
 let myName=localStorage.getItem('wl_name')||'';
 
 if(myName){
-  document.getElementById('nameDisplay').textContent='✦ '+myName;
+  setTimeout(()=>{
+    ['Miau','Nana'].forEach(name=>{
+      const b=document.getElementById('btn-'+name);
+      if(b) b.style.background=name===myName?'rgba(168,85,247,.3)':'transparent';
+    });
+  },100);
 }
 
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
 function quickName(n){
   myName=n; localStorage.setItem('wl_name',n);
-  document.getElementById('nameDisplay').textContent='✦ '+n;
+  document.getElementById('nameDisplay').textContent='';
+  ['Miau','Nana'].forEach(name=>{
+    const b=document.getElementById('btn-'+name);
+    if(b) b.style.background=name===n?'rgba(168,85,247,.3)':'transparent';
+  });
 }
-function saveName(){
-  const v=document.getElementById('nameInput').value.trim();
-  if(!v)return;
-  myName=v; localStorage.setItem('wl_name',v);
-  document.getElementById('nameDisplay').textContent='✦ '+v;
-  document.getElementById('nameInput').value='';
-}
+
 
 ref.on('value',snap=>{
   items=snap.val()||{};
@@ -343,11 +356,10 @@ function addItem(){
     stars:0, note:'', doneDate:null
   });
   document.getElementById('newTitle').value='';
-  document.getElementById('newTotal').value='';
 }
 
 function deleteItem(id){
-  if(!confirm('¿Eliminar "'+( items[id]?.title||'')+'"?'))return;
+  if(!confirm('¿Eliminar?'))return;
   ref.child(id).remove();
 }
 
@@ -390,7 +402,7 @@ function saveNote(id,val){
 
 function surprise(){
   const pending=Object.values(items).filter(i=>i.status==='pending');
-  if(!pending.length){alert('¡No hay pendientes! Agrega algo primero 🎬');return;}
+  if(!pending.length){showToast('¡No hay pendientes! Agrega algo primero ✨');return;}
   const pick=pending[Math.floor(Math.random()*pending.length)];
   highlightId=pick.id;
   filter='all';
@@ -520,5 +532,7 @@ function render(){
 
 document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});
 </script>
+
+<div class="toast" id="toast"></div>
 </body>
 </html>
