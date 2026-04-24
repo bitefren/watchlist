@@ -43,7 +43,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .add-bar select option{background:#1a1a2e}
 .add-bar .title-inp{flex:1;min-width:160px}
 .add-bar .type-sel{width:125px}
-.add-bar .num-inp{width:95px}
+
 .btn-add{padding:10px 20px;background:linear-gradient(135deg,#a855f7,#818cf8);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s}
 .btn-add:hover{opacity:.85}
 .btn-add:active{transform:scale(.97)}
@@ -242,8 +242,8 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 
   <div class="who-bar">
     <span>Eres:</span>
-    <input type="text" id="nameInput" placeholder="Tu nombre..."/>
-    <button class="btn-sm blue" onclick="saveName()">Guardar</button>
+    <button class="btn-sm blue" onclick="quickName('Miau')">Miau</button>
+    <button class="btn-sm blue" onclick="quickName('Nana')">Nana</button>
     <span id="nameDisplay"></span>
   </div>
 
@@ -255,7 +255,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
       <option value="anime">⚡ Anime</option>
       <option value="libro">📖 Libro</option>
     </select>
-    <input class="num-inp" type="number" id="newTotal" placeholder="Eps / págs" min="1"/>
+    
     <button class="btn-add" onclick="addItem()">+ Agregar</button>
   </div>
 
@@ -310,6 +310,10 @@ if(myName){
   document.getElementById('nameInput').placeholder=myName;
 }
 
+function quickName(n){
+  myName=n; localStorage.setItem('wl_name',n);
+  document.getElementById('nameDisplay').textContent='✦ '+n;
+}
 function saveName(){
   const v=document.getElementById('nameInput').value.trim();
   if(!v)return;
