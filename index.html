@@ -320,7 +320,7 @@ async function fetchPoster(title,type){
   try{
     const q=encodeURIComponent(title);
     const mediaType=type==='pelicula'?'movie':type==='libro'?'book':'tv';
-    const url=`https://api.themoviedb.org/3/search/${mediaType==='book'?'movie':mediaType}?api_key=4f4edd702cc98f28d4c0b2e5ae0e7e01&query=${q}&language=es`;
+    const url=`https://api.themoviedb.org/3/search/${mediaType==='book'?'movie':mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=es`;
     const r=await fetch(url);
     const d=await r.json();
     const poster=d.results?.[0]?.poster_path;
