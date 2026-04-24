@@ -98,6 +98,17 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .sync.err{color:rgba(248,113,113,.6)}
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(168,85,247,.25);border:1px solid rgba(168,85,247,.4);color:#e0aaff;padding:10px 22px;border-radius:12px;font-size:14px;font-family:'Nunito',sans-serif;backdrop-filter:blur(12px);opacity:0;transition:all .3s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.autocomplete-wrap{position:relative;flex:1;min-width:160px}
+.autocomplete-wrap input{width:100%}
+.suggestions{position:absolute;top:100%;left:0;right:0;z-index:100;background:#1a1a2e;border:1px solid var(--glass-border);border-radius:10px;margin-top:4px;overflow:hidden;max-height:280px;overflow-y:auto}
+.sug-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .15s}
+.sug-item:hover{background:rgba(168,85,247,.15)}
+.sug-img{width:36px;height:52px;object-fit:cover;border-radius:4px;flex-shrink:0;background:rgba(255,255,255,.05)}
+.sug-img-placeholder{width:36px;height:52px;border-radius:4px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sug-info{flex:1;min-width:0}
+.sug-title{font-size:14px;color:#fff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug-year{font-size:12px;color:var(--muted)}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 @media(max-width:600px){
@@ -220,7 +231,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
   </div>
 
   <div class="add-bar">
-    <input class="title-inp" type="text" id="newTitle" placeholder="Título..."/>
+    <div class="autocomplete-wrap"><input class="title-inp" type="text" id="newTitle" placeholder="Título..." autocomplete="off"/><div class="suggestions" id="suggestions" style="display:none"></div></div>
     <select class="type-sel" id="newType">
       <option value="serie">📺 Serie</option>
       <option value="pelicula">🎬 Película</option>
@@ -528,7 +539,89 @@ function render(){
   }).join('');
 }
 
-document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addItem()});
+
+let sugTimeout=null;
+let currentSuggestions=[];
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('newTitle');
+  const box=document.getElementById('suggestions');
+  
+  inp.addEventListener('input',()=>{
+    clearTimeout(sugTimeout);
+    const q=inp.value.trim();
+    if(q.length<2){box.style.display='none';return;}
+    sugTimeout=setTimeout(()=>searchSuggestions(q),300);
+  });
+
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){box.style.display='none';}
+  });
+
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.autocomplete-wrap')) box.style.display='none';
+  });
+});
+
+async function searchSuggestions(q){
+  const type=document.getElementById('newType').value;
+  const box=document.getElementById('suggestions');
+  const enc=encodeURIComponent(q);
+  let results=[];
+  try{
+    if(type==='libro'){
+      const r=await fetch(`https://openlibrary.org/search.json?title=${enc}&limit=6&fields=title,author_name,first_publish_year,cover_i`);
+      const d=await r.json();
+      results=(d.docs||[]).map(x=>({
+        title:x.title,
+        year:x.first_publish_year||'',
+        poster:x.cover_i?`https://covers.openlibrary.org/b/id/${x.cover_i}-S.jpg`:null,
+        subtitle:x.author_name?.[0]||''
+      }));
+    } else {
+      const mt=type==='pelicula'?'movie':'tv';
+      const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=es&page=1`);
+      const d=await r.json();
+      results=(d.results||[]).slice(0,6).map(x=>({
+        title:x.title||x.name,
+        year:(x.release_date||x.first_air_date||'').slice(0,4),
+        poster:x.poster_path?'https://image.tmdb.org/t/p/w92'+x.poster_path:null,
+        subtitle:''
+      }));
+    }
+  }catch(e){return;}
+
+  currentSuggestions=results;
+  if(!results.length){box.style.display='none';return;}
+  const typeEmojis={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖'};
+  const type2=document.getElementById('newType').value;
+  box.innerHTML=results.map((r,i)=>`
+    <div class="sug-item" onclick="pickSuggestion(${i})">
+      ${r.poster
+        ?`<img class="sug-img" src="${r.poster}" loading="lazy" onerror="this.style.display='none'">`
+        :`<div class="sug-img-placeholder">${typeEmojis[type2]||'🎬'}</div>`}
+      <div class="sug-info">
+        <div class="sug-title">${r.title}</div>
+        <div class="sug-year">${r.subtitle?r.subtitle+' · ':''}${r.year}</div>
+      </div>
+    </div>`).join('');
+  box.style.display='block';
+}
+
+function pickSuggestion(i){
+  const s=currentSuggestions[i];
+  if(!s)return;
+  document.getElementById('newTitle').value=s.title;
+  document.getElementById('suggestions').style.display='none';
+  if(s.poster) posterCache[s.title]=s.poster;
+}
+
+document.getElementById('newType')?.addEventListener('change',()=>{
+  const q=document.getElementById('newTitle').value.trim();
+  if(q.length>=2) searchSuggestions(q);
+});
+
+document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('suggestions').style.display='none';addItem();}});
 </script>
 </body>
 </html>
