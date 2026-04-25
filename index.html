@@ -111,6 +111,11 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .sug-title{font-size:14px;color:#fff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sug-year{font-size:12px;color:var(--muted)}
 
+
+.main-tabs{display:flex;gap:4px;margin-bottom:1.25rem;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:4px;animation:fadeUp .5s .17s ease both}
+.main-tab{flex:1;padding:8px 16px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-size:14px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .2s}
+.main-tab.active{background:linear-gradient(135deg,#ec4899,#f472b6);color:#fff}
+.main-tab:hover:not(.active){color:var(--text);background:rgba(255,150,180,.08)}
 .rec-section{margin-top:2rem;animation:fadeUp .5s ease both}
 .rec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
 .rec-title{font-family:'Philosopher',serif;font-size:22px;font-weight:700;font-style:italic;color:#fce7f3}
@@ -261,35 +266,43 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
     <button class="btn-add" onclick="addItem()">+ Agregar</button>
   </div>
 
-  <div class="toolbar">
-    <select class="sort-sel" id="sortSel" onchange="render()">
-      <option value="recent">🕐 Más reciente</option>
-      <option value="az">🔤 A → Z</option>
-      <option value="stars">⭐ Mejor puntuación</option>
-      <option value="progress">📊 Más progreso</option>
-    </select>
-    <button class="btn-surprise" onclick="surprise()">✨ Sorpréndeme</button>
+  <!-- Main tabs -->
+  <div class="main-tabs">
+    <button class="main-tab active" id="tab-list" onclick="switchTab('list')">Mi Lista</button>
+    <button class="main-tab" id="tab-rec" onclick="switchTab('rec')">✨ Recomendaciones</button>
   </div>
 
-  <div class="filters">
-    <button class="fbtn active" onclick="setFilter('all',this)">Todos</button>
-    <button class="fbtn" onclick="setFilter('pending',this)">Pendiente</button>
-    <button class="fbtn" onclick="setFilter('watching',this)">Viendo</button>
-    <button class="fbtn" onclick="setFilter('done',this)">Terminado</button>
-    <button class="fbtn" onclick="setFilter('serie',this)">Series</button>
-    <button class="fbtn" onclick="setFilter('pelicula',this)">Películas</button>
-    <button class="fbtn" onclick="setFilter('anime',this)">Anime</button>
-    <button class="fbtn" onclick="setFilter('libro',this)">Libros</button>
-    <button class="fbtn" onclick="setFilter('kdrama',this)">K-Dramas</button>
+  <!-- LIST PANEL -->
+  <div id="panel-list">
+    <div class="toolbar">
+      <select class="sort-sel" id="sortSel" onchange="render()">
+        <option value="recent">🕐 Más reciente</option>
+        <option value="az">🔤 A → Z</option>
+        <option value="stars">⭐ Mejor puntuación</option>
+        <option value="progress">📊 Más progreso</option>
+      </select>
+      <button class="btn-surprise" onclick="surprise()">✨ Sorpréndeme</button>
+    </div>
+    <div class="filters">
+      <button class="fbtn active" onclick="setFilter('all',this)">Todos</button>
+      <button class="fbtn" onclick="setFilter('pending',this)">Pendiente</button>
+      <button class="fbtn" onclick="setFilter('watching',this)">Viendo</button>
+      <button class="fbtn" onclick="setFilter('done',this)">Terminado</button>
+      <button class="fbtn" onclick="setFilter('serie',this)">Series</button>
+      <button class="fbtn" onclick="setFilter('pelicula',this)">Películas</button>
+      <button class="fbtn" onclick="setFilter('anime',this)">Anime</button>
+      <button class="fbtn" onclick="setFilter('libro',this)">Libros</button>
+      <button class="fbtn" onclick="setFilter('kdrama',this)">K-Dramas</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="sync" id="syncStatus">Conectando...</div>
+    <div id="list"></div>
   </div>
 
-  <div class="stats" id="stats"></div>
-  <div class="sync" id="syncStatus">Conectando...</div>
-  <div id="list"></div>
-
-  <div class="rec-section" id="recSection" style="display:none">
+  <!-- REC PANEL -->
+  <div id="panel-rec" style="display:none">
     <div class="rec-header">
-      <div class="rec-title">✨ Recomendaciones</div>
+      <div class="rec-title">✨ Para ti</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select class="sort-sel" id="recTypeFilter">
           <option value="all">Todos los tipos</option>
@@ -304,8 +317,14 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
     </div>
     <div class="rec-loading" id="recLoading">✨ Analizando tu lista...</div>
     <div class="rec-grid" id="recGrid"></div>
-  </div>
+
+
+
+
+
 </div>
+
+</div><!-- /panel-rec -->
 
 <div class="toast" id="toast"></div>
 
@@ -719,9 +738,17 @@ const GROQ_KEY='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';
 let recPosters={};
 
 // Show rec section once items load
+
+function switchTab(tab){
+  document.getElementById('panel-list').style.display=tab==='list'?'block':'none';
+  document.getElementById('panel-rec').style.display=tab==='rec'?'block':'none';
+  document.getElementById('tab-list').classList.toggle('active',tab==='list');
+  document.getElementById('tab-rec').classList.toggle('active',tab==='rec');
+  if(tab==='rec'&&document.getElementById('recGrid').innerHTML==='') getRecommendations();
+}
 function checkShowRec(){
   const all=Object.values(items);
-  document.getElementById('recSection').style.display=all.length>=2?'block':'none';
+  // rec tab always visible
 }
 
 async function getRecommendations(){
