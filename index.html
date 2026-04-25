@@ -961,7 +961,7 @@ function render(){
 
 function shareItem(id){
   const item=items[id];if(!item)return;
-  const link='https://bitefren.github.io/share.html?id='+id+'&type=item';
+  const link='https://bitefren.github.io/watchlist/share.html?id='+id+'&type=item';
   const text=`Mira lo que tengo en mi lista: *${item.title}*\n\n${link}`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
@@ -1249,8 +1249,7 @@ function renderOneRec(r,container){
         <div class="rec-vote">
           <button onclick="voteRec('${safetitle}',1,this)">+1</button>
           <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-          <button onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
-          ${r.detail?`<button onclick="this.closest('.rec-info').querySelector('.rec-why-text').classList.toggle('show')">...</button>`:''}
+          <button class="rec-wa-btn" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
         </div>
       </div>
     </div>`;
@@ -1267,7 +1266,7 @@ function shareRec(btn){
   const type=btn.dataset.type||'serie';
   const platform=btn.dataset.platform||'';
   const score=btn.dataset.score||'';
-  const base='https://bitefren.github.io/share.html';
+  const base='https://bitefren.github.io/watchlist/share.html';
   const params=new URLSearchParams({id:Date.now(),type:'rec',title,t:type,reason,platform,score});
   const link=base+'?'+params.toString();
   const text='Te recomiendo: *'+title+'*\n_'+reason+'_\n\n'+link;
@@ -1300,7 +1299,7 @@ function renderRecs(recs){
           <div class="rec-vote">
             <button onclick="voteRec('${safetitle}',1,this)">+1</button>
             <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-            <button onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
+            <button class="rec-wa-btn" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
             ${r.detail?`<button onclick="toggleDetail(${i})">...</button>`:''}
           </div>
         </div>
