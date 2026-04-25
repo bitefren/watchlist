@@ -1055,7 +1055,7 @@ function setMood(mood,btn){
   btn.classList.add('active');
 }
 
-function refreshRecs(){document.getElementById('recGrid').innerHTML='';recHistory=recHistory.slice(0,-6);localStorage.setItem('recHistory',JSON.stringify(recHistory));getRecommendations();}
+function refreshRecs(){recHistory=[];localStorage.setItem('recHistory','[]');document.getElementById('recGrid').innerHTML='';getRecommendations();}
 
 // Normalize title for comparison (ignore case, accents, articles)
 function normalizeTitle(t){
@@ -1249,7 +1249,7 @@ function renderOneRec(r,container){
         <div class="rec-vote">
           <button onclick="voteRec('${safetitle}',1,this)">+1</button>
           <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-          <button class="rec-wa-btn" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
+          <button class="rec-wa-btn" onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
         </div>
       </div>
     </div>`;
@@ -1299,7 +1299,7 @@ function renderRecs(recs){
           <div class="rec-vote">
             <button onclick="voteRec('${safetitle}',1,this)">+1</button>
             <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-            <button class="rec-wa-btn" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
+            <button class="rec-wa-btn" onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
             ${r.detail?`<button onclick="toggleDetail(${i})">...</button>`:''}
           </div>
         </div>
