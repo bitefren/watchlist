@@ -537,6 +537,7 @@ function setFilter(f,btn){
 const statusLbl={pending:'Pendiente',watching:'Viendo',done:'Terminado ✓'};
 const dotCls={pending:'dot-pending',watching:'dot-watching',done:'dot-done'};
 const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',pelianime:'🎌',libro:'📖',kdrama:'🌸'};
+function safeType(t){return typeEmoji[t]?t:'serie';}
 
 function progressPct(item){
   if(!item.total)return 0;
@@ -615,7 +616,7 @@ function render(){
         <div class="card-info">
           <div class="card-title">
             <span>${item.title}</span>
-            <span class="badge ${item.type}">${typeEmoji[item.type]||''} ${item.type}</span>
+            <span class="badge ${safeType(item.type)}">${typeEmoji[safeType(item.type)]} ${safeType(item.type)}</span>
             ${hl?'<span style="font-size:13px;color:var(--gold)">✨ ¡Esta!</span>':''}
           </div>
           <div class="card-meta">
@@ -700,7 +701,7 @@ async function searchSuggestions(q){
           const [d1,d2]=await Promise.all([r1.json(),r2.json()]);
           const combined=[...(d1.results||[]),...(d2.results||[])];
           raw=raw.concat(combined.map(x=>({
-            title:x.title||x.name,
+            title:x.title||x.name||x.original_title||x.original_name||'',
             year:(x.release_date||x.first_air_date||'').slice(0,4),
             poster:x.poster_path?'https://image.tmdb.org/t/p/w92'+x.poster_path:null,
             subtitle:'',
@@ -710,6 +711,7 @@ async function searchSuggestions(q){
       }
       const seen=new Set();
       raw.sort((a,b)=>b.pop-a.pop);
+      raw=raw.filter(x=>x.title&&x.title.trim()!='');
       results=raw.filter(x=>{
         const k=x.title+'|'+x.year;
         if(seen.has(k))return false;
@@ -922,30 +924,32 @@ function renderRecs(recs){
   grid.innerHTML=recs.map((r,i)=>{
     const inList=Object.values(items).some(it=>it.title.toLowerCase()===r.title.toLowerCase());
     const safetitle=r.title.replace(/'/g,"\'").replace(/"/g,'&quot;');
+    const safereason=(r.reason||'').replace(/'/g,"\'");
+    const rtype=r.type&&recTypeEmoji[r.type]?r.type:'serie';
     return `<div class="rec-card" id="rec-${i}">
       <div class="rec-poster-wrap">
-        <div class="rec-poster-ph" id="rec-ph-${i}">${recTypeEmoji[r.type]||'🎬'}</div>
-        <span class="rec-badge ${r.type}">${recTypeEmoji[r.type]} ${r.type}</span>
-        <div class="rec-overlay">
-          <button class="rec-add-btn ${inList?'added':''}" id="rec-add-${i}" onclick="addRecToList('${safetitle}','${r.type}',this)" ${inList?'disabled':''}>
-            ${inList?'✓ En lista':'+ Agregar'}
-          </button>
-          <div class="rec-vote">
-            <button onclick="voteRec('${safetitle}',1,this)" title="Me gusta">👍</button>
-            <button onclick="voteRec('${safetitle}',-1,this)" title="No me gusta">👎</button>
-            <button class="rec-share" onclick="shareRec('${safetitle}','${(r.reason||'').replace(/'/g,"\'")}')" title="Compartir por WhatsApp">💬</button>
-          </div>
-          <button class="rec-expand-btn" onclick="toggleDetail(${i})">Ver más info</button>
-        </div>
+        <div class="rec-poster-ph" id="rec-ph-${i}">${recTypeEmoji[rtype]||'🎬'}</div>
+        <span class="rec-badge ${rtype}">${recTypeEmoji[rtype]} ${rtype}</span>
       </div>
       <div class="rec-info">
-        <div class="rec-name">${r.title}</div>
+        <div class="rec-name">${r.title||'Sin título'}</div>
         <div class="rec-meta">
           ${r.score?`<span class="rec-score">★ ${r.score}</span>`:''}
           ${r.platform?`<span class="rec-platform">${r.platform}</span>`:''}
         </div>
         <div class="rec-reason">${r.reason||''}</div>
         ${r.detail?`<div class="rec-why-text" id="rec-detail-${i}">${r.detail}</div>`:''}
+        <div class="rec-actions">
+          <button class="rec-add-btn ${inList?'added':''}" id="rec-add-${i}" onclick="addRecToList('${safetitle}','${rtype}',this)" ${inList?'disabled':''}>
+            ${inList?'✓ En lista':'+ Agregar'}
+          </button>
+          <div class="rec-vote">
+            <button onclick="voteRec('${safetitle}',1,this)">👍</button>
+            <button onclick="voteRec('${safetitle}',-1,this)">👎</button>
+            <button onclick="shareRec('${safetitle}','${safereason}')">💬</button>
+            ${r.detail?`<button onclick="toggleDetail(${i})">🔍</button>`:''}
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
