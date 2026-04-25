@@ -8,9 +8,9 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07090f;--glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
-  --glass-hover:rgba(255,255,255,0.07);--accent:#c084fc;--accent2:#818cf8;
-  --gold:#fbbf24;--teal:#2dd4bf;--text:#e2e8f0;--muted:#64748b;
+  --bg:#0d070f;--glass:rgba(255,192,203,0.05);--glass-border:rgba(255,150,180,0.12);
+  --glass-hover:rgba(255,150,180,0.08);--accent:#f472b6;--accent2:#e879a0;
+  --gold:#fbbf24;--teal:#f9a8d4;--text:#fce7f3;--muted:#9d6b7e;
 }
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
 #bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
@@ -21,28 +21,28 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 header{text-align:center;margin-bottom:2rem;animation:fadeDown .6s ease both}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-weight:700;font-style:italic;background:linear-gradient(135deg,#e0aaff,#c084fc,#a78bfa,#7dd3fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.04em}
+header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-weight:700;font-style:italic;background:linear-gradient(135deg,#fce7f3,#f472b6,#ec4899,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.04em}
 .who-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;padding:10px 16px;margin-bottom:1.25rem;backdrop-filter:blur(12px);animation:fadeUp .5s .1s ease both}
 .who-bar span{font-size:13px;color:var(--muted)}
-#nameDisplay{font-size:13px;color:var(--accent);font-weight:600}
+#nameDisplay{font-size:13px;color:#f472b6;font-weight:600}
 .add-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;animation:fadeUp .5s .15s ease both;position:relative;z-index:50}
 .add-bar input,.add-bar select{padding:10px 12px;background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;color:var(--text);font-size:15px;font-family:'Nunito',sans-serif;backdrop-filter:blur(8px);transition:border-color .2s}
 .add-bar input:focus,.add-bar select:focus{outline:none;border-color:var(--accent)}
 .add-bar select option{background:#1a1a2e}
 .add-bar .title-inp{flex:1;min-width:160px}
 .add-bar .type-sel{width:125px}
-.btn-add{padding:10px 20px;background:linear-gradient(135deg,#a855f7,#818cf8);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s}
+.btn-add{padding:10px 20px;background:linear-gradient(135deg,#ec4899,#f472b6);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .1s}
 .btn-add:hover{opacity:.85}
 .btn-add:active{transform:scale(.97)}
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;animation:fadeUp .5s .18s ease both;position:relative;z-index:10}
 .sort-sel{padding:6px 10px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Nunito',sans-serif}
 .sort-sel option{background:#1a1a2e}
-.btn-surprise{padding:6px 14px;background:linear-gradient(135deg,rgba(251,191,36,.2),rgba(248,113,113,.2));border:1px solid rgba(251,191,36,.35);border-radius:8px;color:var(--gold);font-size:13px;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .2s}
+.btn-surprise{padding:6px 14px;background:linear-gradient(135deg,rgba(244,114,182,.2),rgba(249,168,212,.2));border:1px solid rgba(244,114,182,.4);border-radius:8px;color:var(--accent);font-size:13px;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .2s}
 .btn-surprise:hover{opacity:.8}
 .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp .5s .2s ease both;position:relative;z-index:10}
 .fbtn{padding:5px 14px;border:1px solid var(--glass-border);border-radius:20px;background:transparent;color:var(--muted);font-size:13px;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .15s}
 .fbtn:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
-.fbtn.active{background:rgba(168,85,247,.15);border-color:var(--accent);color:var(--accent)}
+.fbtn.active{background:rgba(244,114,182,.15);border-color:var(--accent);color:var(--accent)}
 .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp .5s .22s ease both}
 .stat{flex:1;min-width:80px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;padding:10px 14px;text-align:center;backdrop-filter:blur(10px)}
 .stat-n{font-size:28px;font-weight:700;color:#fff;font-family:'Philosopher',serif}
@@ -50,37 +50,37 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .card{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:0;backdrop-filter:blur(14px);transition:border-color .2s,background .2s,transform .15s;animation:fadeUp .4s ease both;overflow:hidden}
 .card:hover{border-color:rgba(255,255,255,.13);background:var(--glass-hover);transform:translateY(-1px)}
 .card.done{opacity:.5}
-.card.highlighted{border-color:var(--gold);box-shadow:0 0 18px rgba(251,191,36,.15)}
+.card.highlighted{border-color:#f472b6;box-shadow:0 0 18px rgba(244,114,182,.2)}
 /* poster */
 .card-poster{width:80px;min-width:80px;height:110px;object-fit:cover;display:block}
 .card-poster-placeholder{width:80px;min-width:80px;height:110px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
 .card-body{flex:1;min-width:0;padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:6px}
 .dot-pending{background:var(--muted)}
-.dot-watching{background:var(--gold);box-shadow:0 0 8px rgba(251,191,36,.5)}
-.dot-done{background:var(--teal);box-shadow:0 0 8px rgba(45,212,191,.4)}
+.dot-watching{background:#f472b6;box-shadow:0 0 8px rgba(244,114,182,.6)}
+.dot-done{background:#f9a8d4;box-shadow:0 0 8px rgba(249,168,212,.5)}
 .card-info{flex:1;min-width:0}
 .card-title{font-family:'Philosopher',serif;font-size:19px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px}
 .badge{font-size:12px;padding:3px 9px;border-radius:8px;font-weight:600;font-family:'Nunito',sans-serif;letter-spacing:.04em;text-transform:uppercase}
-.badge.serie{background:rgba(192,132,252,.15);color:#c084fc;border:1px solid rgba(192,132,252,.3)}
+.badge.serie{background:rgba(244,114,182,.15);color:#f472b6;border:1px solid rgba(244,114,182,.3)}
 .badge.pelicula{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
-.badge.anime{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
-.badge.libro{background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.25)}
+.badge.anime{background:rgba(236,72,153,.12);color:#ec4899;border:1px solid rgba(236,72,153,.25)}
+.badge.libro{background:rgba(249,168,212,.12);color:#f9a8d4;border:1px solid rgba(249,168,212,.3)}
 .card-meta{font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
-.done-date{color:rgba(45,212,191,.5);font-size:12px}
+.done-date{color:rgba(249,168,212,.6);font-size:12px}
 .stars-display{display:flex;gap:2px;margin-bottom:6px}
 .star-icon{font-size:16px;cursor:pointer;transition:transform .1s;opacity:.25;color:var(--gold)}
 .star-icon.lit{opacity:1}
 .star-icon:hover{transform:scale(1.2);opacity:.8}
 .progress-bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:8px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,#a855f7,#2dd4bf);border-radius:2px;transition:width .4s ease}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ec4899,#f9a8d4);border-radius:2px;transition:width .4s ease}
 .card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .btn-sm{padding:3px 11px;font-size:13px;font-family:'Nunito',sans-serif;border:1px solid var(--glass-border);border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
 .btn-sm:hover{background:rgba(255,255,255,.07);color:var(--text)}
-.btn-sm.blue{border-color:rgba(129,140,248,.4);color:var(--accent2)}
-.btn-sm.blue:hover{background:rgba(129,140,248,.12)}
-.btn-sm.green{border-color:rgba(45,212,191,.35);color:var(--teal)}
-.btn-sm.green:hover{background:rgba(45,212,191,.1)}
+.btn-sm.blue{border-color:rgba(244,114,182,.4);color:var(--accent)}
+.btn-sm.blue:hover{background:rgba(244,114,182,.12)}
+.btn-sm.green{border-color:rgba(249,168,212,.4);color:#f9a8d4}
+.btn-sm.green:hover{background:rgba(249,168,212,.1)}
 .btn-sm.red{border-color:rgba(248,113,113,.3);color:#f87171}
 .btn-sm.red:hover{background:rgba(248,113,113,.1)}
 .progress-fields{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
@@ -91,19 +91,19 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .pf-group span{font-size:13px;color:var(--muted)}
 .note-field{width:100%;padding:5px 10px;background:rgba(255,255,255,.03);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:13px;font-family:'Nunito',sans-serif;resize:none;height:32px;margin-bottom:2px}
 .note-field:focus{outline:none;border-color:var(--accent);height:64px}
-.note-display{font-size:13px;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:6px}
+.note-display{font-size:13px;color:rgba(249,168,212,.4);font-style:italic;margin-bottom:6px}
 .empty{text-align:center;color:var(--muted);font-size:15px;padding:4rem 0}
 .sync{font-size:11px;color:var(--muted);text-align:right;margin-bottom:.75rem}
 .sync.ok{color:rgba(45,212,251,.6)}
 .sync.err{color:rgba(248,113,113,.6)}
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(168,85,247,.25);border:1px solid rgba(168,85,247,.4);color:#e0aaff;padding:10px 22px;border-radius:12px;font-size:14px;font-family:'Nunito',sans-serif;backdrop-filter:blur(12px);opacity:0;transition:all .3s;pointer-events:none;z-index:999}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(236,72,153,.2);border:1px solid rgba(244,114,182,.4);color:#fce7f3;padding:10px 22px;border-radius:12px;font-size:14px;font-family:'Nunito',sans-serif;backdrop-filter:blur(12px);opacity:0;transition:all .3s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .autocomplete-wrap{position:relative;flex:1;min-width:160px;z-index:9999}
 .autocomplete-wrap input{width:100%}
-.suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:9999;background:#13111f;border:1px solid rgba(168,85,247,.35);border-radius:10px;overflow:hidden;max-height:260px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:9999;background:#1a0d14;border:1px solid rgba(244,114,182,.3);border-radius:10px;overflow:hidden;max-height:260px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6)}
 .sug-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .15s}
-.sug-item:hover{background:rgba(168,85,247,.15)}
+.sug-item:hover{background:rgba(244,114,182,.12)}
 .sug-img{width:36px;height:52px;object-fit:cover;border-radius:4px;flex-shrink:0;background:rgba(255,255,255,.05)}
 .sug-img-placeholder{width:36px;height:52px;border-radius:4px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .sug-info{flex:1;min-width:0}
@@ -126,11 +126,11 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 <div id="bg-scene">
 <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="g1" cx="20%" cy="20%"><stop offset="0%" stop-color="#c084fc" stop-opacity=".18"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-    <radialGradient id="g2" cx="80%" cy="80%"><stop offset="0%" stop-color="#818cf8" stop-opacity=".15"/><stop offset="100%" stop-color="transparent"/></radialGradient>
-    <radialGradient id="g3" cx="50%" cy="50%"><stop offset="0%" stop-color="#2dd4bf" stop-opacity=".1"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <radialGradient id="g1" cx="20%" cy="20%"><stop offset="0%" stop-color="#f472b6" stop-opacity=".22"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <radialGradient id="g2" cx="80%" cy="80%"><stop offset="0%" stop-color="#ec4899" stop-opacity=".16"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+    <radialGradient id="g3" cx="50%" cy="50%"><stop offset="0%" stop-color="#f9a8d4" stop-opacity=".12"/><stop offset="100%" stop-color="transparent"/></radialGradient>
   </defs>
-  <rect width="1440" height="900" fill="#07090f"/>
+  <rect width="1440" height="900" fill="#0d070f"/>
   <ellipse cx="200" cy="200" rx="500" ry="400" fill="url(#g1)"/>
   <ellipse cx="1300" cy="750" rx="450" ry="350" fill="url(#g2)"/>
   <ellipse cx="720" cy="450" rx="300" ry="300" fill="url(#g3)"/>
@@ -151,44 +151,44 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
     <circle class="star" cx="1050" cy="450" r=".7" style="animation-delay:2.5s"/>
   </g>
   <g opacity=".045" transform="translate(40,280) rotate(-10)">
-    <rect x="0" y="0" width="190" height="130" rx="4" fill="none" stroke="#a855f7" stroke-width="1.5"/>
-    <rect x="-10" y="15" width="8" height="14" rx="2" fill="#a855f7"/><rect x="-10" y="40" width="8" height="14" rx="2" fill="#a855f7"/><rect x="-10" y="65" width="8" height="14" rx="2" fill="#a855f7"/><rect x="-10" y="90" width="8" height="14" rx="2" fill="#a855f7"/>
-    <rect x="192" y="15" width="8" height="14" rx="2" fill="#a855f7"/><rect x="192" y="40" width="8" height="14" rx="2" fill="#a855f7"/><rect x="192" y="65" width="8" height="14" rx="2" fill="#a855f7"/><rect x="192" y="90" width="8" height="14" rx="2" fill="#a855f7"/>
-    <rect x="12" y="12" width="50" height="46" rx="2" fill="#a855f7" opacity=".3"/><rect x="70" y="12" width="50" height="46" rx="2" fill="#818cf8" opacity=".25"/><rect x="128" y="12" width="50" height="46" rx="2" fill="#7dd3fc" opacity=".2"/>
-    <rect x="12" y="66" width="50" height="46" rx="2" fill="#818cf8" opacity=".2"/><rect x="70" y="66" width="50" height="46" rx="2" fill="#a855f7" opacity=".25"/><rect x="128" y="66" width="50" height="46" rx="2" fill="#2dd4bf" opacity=".2"/>
+    <rect x="0" y="0" width="190" height="130" rx="4" fill="none" stroke="#f472b6" stroke-width="1.5"/>
+    <rect x="-10" y="15" width="8" height="14" rx="2" fill="#f472b6"/><rect x="-10" y="40" width="8" height="14" rx="2" fill="#f472b6"/><rect x="-10" y="65" width="8" height="14" rx="2" fill="#f472b6"/><rect x="-10" y="90" width="8" height="14" rx="2" fill="#f472b6"/>
+    <rect x="192" y="15" width="8" height="14" rx="2" fill="#f472b6"/><rect x="192" y="40" width="8" height="14" rx="2" fill="#f472b6"/><rect x="192" y="65" width="8" height="14" rx="2" fill="#f472b6"/><rect x="192" y="90" width="8" height="14" rx="2" fill="#f472b6"/>
+    <rect x="12" y="12" width="50" height="46" rx="2" fill="#f472b6" opacity=".3"/><rect x="70" y="12" width="50" height="46" rx="2" fill="#e879a0" opacity=".25"/><rect x="128" y="12" width="50" height="46" rx="2" fill="#7dd3fc" opacity=".2"/>
+    <rect x="12" y="66" width="50" height="46" rx="2" fill="#e879a0" opacity=".2"/><rect x="70" y="66" width="50" height="46" rx="2" fill="#f472b6" opacity=".25"/><rect x="128" y="66" width="50" height="46" rx="2" fill="#2dd4bf" opacity=".2"/>
   </g>
   <g opacity=".035" transform="translate(1180,80) rotate(7)">
-    <rect x="0" y="0" width="210" height="300" rx="4" fill="none" stroke="#818cf8" stroke-width="2"/>
-    <rect x="-12" y="18" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="50" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="82" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="114" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="146" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="178" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="210" width="10" height="18" rx="2" fill="#818cf8"/><rect x="-12" y="242" width="10" height="18" rx="2" fill="#818cf8"/>
-    <rect x="212" y="18" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="50" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="82" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="114" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="146" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="178" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="210" width="10" height="18" rx="2" fill="#818cf8"/><rect x="212" y="242" width="10" height="18" rx="2" fill="#818cf8"/>
-    <rect x="14" y="12" width="182" height="88" rx="3" fill="#a855f7" opacity=".35"/><rect x="14" y="108" width="182" height="88" rx="3" fill="#818cf8" opacity=".28"/><rect x="14" y="204" width="182" height="84" rx="3" fill="#2dd4bf" opacity=".22"/>
+    <rect x="0" y="0" width="210" height="300" rx="4" fill="none" stroke="#e879a0" stroke-width="2"/>
+    <rect x="-12" y="18" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="50" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="82" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="114" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="146" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="178" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="210" width="10" height="18" rx="2" fill="#e879a0"/><rect x="-12" y="242" width="10" height="18" rx="2" fill="#e879a0"/>
+    <rect x="212" y="18" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="50" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="82" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="114" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="146" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="178" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="210" width="10" height="18" rx="2" fill="#e879a0"/><rect x="212" y="242" width="10" height="18" rx="2" fill="#e879a0"/>
+    <rect x="14" y="12" width="182" height="88" rx="3" fill="#f472b6" opacity=".35"/><rect x="14" y="108" width="182" height="88" rx="3" fill="#e879a0" opacity=".28"/><rect x="14" y="204" width="182" height="84" rx="3" fill="#2dd4bf" opacity=".22"/>
   </g>
   <g opacity=".055" transform="translate(1060,580)">
-    <ellipse cx="0" cy="0" rx="58" ry="74" fill="none" stroke="#c084fc" stroke-width="1.5"/>
-    <ellipse cx="0" cy="0" rx="36" ry="46" fill="#a855f7" opacity=".5"/>
+    <ellipse cx="0" cy="0" rx="58" ry="74" fill="none" stroke="#f9a8d4" stroke-width="1.5"/>
+    <ellipse cx="0" cy="0" rx="36" ry="46" fill="#f472b6" opacity=".5"/>
     <ellipse cx="0" cy="0" rx="16" ry="20" fill="#07090f"/>
     <ellipse cx="-9" cy="-11" rx="7" ry="8" fill="#fff" opacity=".9"/>
     <ellipse cx="7" cy="7" rx="3" ry="4" fill="#fff" opacity=".45"/>
-    <line x1="-35" y1="-55" x2="-28" y2="-46" stroke="#c084fc" stroke-width="1.5"/><line x1="-15" y1="-68" x2="-12" y2="-57" stroke="#c084fc" stroke-width="1.5"/><line x1="8" y1="-70" x2="6" y2="-58" stroke="#c084fc" stroke-width="1.5"/><line x1="28" y1="-62" x2="24" y2="-51" stroke="#c084fc" stroke-width="1.5"/><line x1="44" y1="-46" x2="37" y2="-38" stroke="#c084fc" stroke-width="1.5"/>
+    <line x1="-35" y1="-55" x2="-28" y2="-46" stroke="#f9a8d4" stroke-width="1.5"/><line x1="-15" y1="-68" x2="-12" y2="-57" stroke="#f9a8d4" stroke-width="1.5"/><line x1="8" y1="-70" x2="6" y2="-58" stroke="#f9a8d4" stroke-width="1.5"/><line x1="28" y1="-62" x2="24" y2="-51" stroke="#f9a8d4" stroke-width="1.5"/><line x1="44" y1="-46" x2="37" y2="-38" stroke="#f9a8d4" stroke-width="1.5"/>
   </g>
   <g opacity=".04" transform="translate(350,660)">
-    <ellipse cx="0" cy="0" rx="42" ry="54" fill="none" stroke="#818cf8" stroke-width="1.2"/>
-    <ellipse cx="0" cy="0" rx="26" ry="34" fill="#818cf8" opacity=".4"/>
+    <ellipse cx="0" cy="0" rx="42" ry="54" fill="none" stroke="#e879a0" stroke-width="1.2"/>
+    <ellipse cx="0" cy="0" rx="26" ry="34" fill="#e879a0" opacity=".4"/>
     <ellipse cx="0" cy="0" rx="11" ry="15" fill="#07090f"/>
     <ellipse cx="-6" cy="-8" rx="5" ry="6" fill="#fff" opacity=".9"/>
-    <line x1="-26" y1="-40" x2="-20" y2="-33" stroke="#818cf8" stroke-width="1.2"/><line x1="-8" y1="-50" x2="-6" y2="-41" stroke="#818cf8" stroke-width="1.2"/><line x1="10" y1="-50" x2="8" y2="-41" stroke="#818cf8" stroke-width="1.2"/><line x1="26" y1="-42" x2="22" y2="-34" stroke="#818cf8" stroke-width="1.2"/>
+    <line x1="-26" y1="-40" x2="-20" y2="-33" stroke="#e879a0" stroke-width="1.2"/><line x1="-8" y1="-50" x2="-6" y2="-41" stroke="#e879a0" stroke-width="1.2"/><line x1="10" y1="-50" x2="8" y2="-41" stroke="#e879a0" stroke-width="1.2"/><line x1="26" y1="-42" x2="22" y2="-34" stroke="#e879a0" stroke-width="1.2"/>
   </g>
   <g opacity=".05" transform="translate(680,60)">
     <circle cx="0" cy="0" r="46" fill="#fbbf24" opacity=".6"/><circle cx="18" cy="-10" r="38" fill="#07090f"/>
     <circle cx="-50" cy="-20" r="2.5" fill="#fbbf24"/><circle cx="-60" cy="10" r="1.5" fill="#fbbf24"/><circle cx="40" cy="-40" r="2" fill="#fbbf24"/><circle cx="55" cy="5" r="1.5" fill="#fbbf24"/>
   </g>
   <g opacity=".04" transform="translate(1350,430)">
-    <circle cx="0" cy="0" r="65" fill="none" stroke="#a855f7" stroke-width="1"/><circle cx="0" cy="0" r="50" fill="none" stroke="#818cf8" stroke-width=".8"/><circle cx="0" cy="0" r="30" fill="none" stroke="#a855f7" stroke-width=".6"/>
-    <polygon points="0,-60 57,30 -57,30" fill="none" stroke="#818cf8" stroke-width=".8"/><polygon points="0,60 57,-30 -57,-30" fill="none" stroke="#818cf8" stroke-width=".8"/>
+    <circle cx="0" cy="0" r="65" fill="none" stroke="#f472b6" stroke-width="1"/><circle cx="0" cy="0" r="50" fill="none" stroke="#e879a0" stroke-width=".8"/><circle cx="0" cy="0" r="30" fill="none" stroke="#f472b6" stroke-width=".6"/>
+    <polygon points="0,-60 57,30 -57,30" fill="none" stroke="#e879a0" stroke-width=".8"/><polygon points="0,60 57,-30 -57,-30" fill="none" stroke="#e879a0" stroke-width=".8"/>
   </g>
   <g opacity=".035" transform="translate(90,150)">
-    <circle cx="0" cy="0" r="40" fill="none" stroke="#2dd4bf" stroke-width="1"/><circle cx="0" cy="0" r="28" fill="none" stroke="#818cf8" stroke-width=".8"/>
-    <polygon points="0,-36 34,18 -34,18" fill="none" stroke="#2dd4bf" stroke-width=".8"/><polygon points="0,36 34,-18 -34,-18" fill="none" stroke="#2dd4bf" stroke-width=".8"/>
+    <circle cx="0" cy="0" r="40" fill="none" stroke="#f472b6" stroke-width="1"/><circle cx="0" cy="0" r="28" fill="none" stroke="#e879a0" stroke-width=".8"/>
+    <polygon points="0,-36 34,18 -34,18" fill="none" stroke="#f472b6" stroke-width=".8"/><polygon points="0,36 34,-18 -34,-18" fill="none" stroke="#f472b6" stroke-width=".8"/>
   </g>
   <g opacity=".04" transform="translate(680,820)">
     <circle cx="0" cy="0" r="44" fill="none" stroke="#fbbf24" stroke-width="1.5"/><circle cx="0" cy="0" r="34" fill="#fbbf24" opacity=".12"/>
@@ -201,13 +201,13 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
     <line x1="47" y1="22" x2="77" y2="22" stroke="#07090f" stroke-width="1.2"/><line x1="47" y1="35" width="77" y2="35" stroke="#07090f" stroke-width=".8"/>
     <rect x="8" y="62" width="28" height="36" rx="2" fill="#07090f" opacity=".35"/><rect x="47" y="62" width="28" height="36" rx="2" fill="#07090f" opacity=".28"/>
   </g>
-  <g fill="#c084fc" opacity=".1">
+  <g fill="#f9a8d4" opacity=".1">
     <polygon points="730,44 733,37 736,44 743,44 737,49 740,56 733,51 726,56 729,49 723,44"/>
     <polygon points="95,545 97,540 99,545 104,545 100,548 102,553 97,550 92,553 94,548 90,545"/>
     <polygon points="1385,295 1387,290 1389,295 1394,295 1390,298 1392,303 1387,300 1382,303 1384,298 1380,295"/>
     <polygon points="450,180 452,175 454,180 459,180 455,183 457,188 452,185 447,188 449,183 445,180"/>
   </g>
-  <g opacity=".02" stroke="#818cf8" stroke-width="1">
+  <g opacity=".02" stroke="#e879a0" stroke-width="1">
     <line x1="0" y1="900" x2="180" y2="620"/><line x1="25" y1="900" x2="205" y2="620"/><line x1="50" y1="900" x2="230" y2="620"/>
     <line x1="1440" y1="0" x2="1260" y2="280"/><line x1="1415" y1="0" x2="1235" y2="280"/><line x1="1390" y1="0" x2="1210" y2="280"/>
   </g>
@@ -388,8 +388,29 @@ function updateEp(id,val){
   ref.child(id).update(upd);
 }
 
-function updateMin(id,val){
+
+function formatMin(val){
+  if(!val) return '';
   const v=parseInt(val)||0;
+  const h=Math.floor(v/60);
+  const m=v%60;
+  if(h>0) return h+':'+(m<10?'0'+m:m);
+  return String(v);
+}
+
+function parseMin(str){
+  if(!str) return 0;
+  str=str.trim();
+  if(str.includes(':')){
+    const parts=str.split(':');
+    const h=parseInt(parts[0])||0;
+    const m=parseInt(parts[1])||0;
+    return h*60+m;
+  }
+  return parseInt(str)||0;
+}
+function updateMin(id,val){
+  const v=parseMin(val);
   const item=items[id]; if(!item)return;
   const upd={min:v};
   if((item.ep>0||v>0)&&item.status==='pending') upd.status='watching';
@@ -442,7 +463,7 @@ function progressLabel(item){
   if(item.type==='libro') return item.ep?`pág ${item.ep}`:'';
   let s='';
   if(item.ep) s+=`ep ${item.ep}`;
-  if(item.min) s+=(s?' · ':'')+`min ${item.min}`;
+  if(item.min) s+=(s?' · ':'')+`${formatMin(item.min)}`;
   return s;
 }
 
@@ -519,7 +540,7 @@ function render(){
           <div class="stars-display">${starsHTML(item.id,item.stars)}</div>
           ${item.note?`<div class="note-display">"${item.note}"</div>`:''}
           <div class="card-actions">
-            ${item.status!=='watching'&&item.status!=='done'?`<button class="btn-sm blue" onclick="setStatus('${item.id}','watching')">▶ Empezar</button>`:''}
+            ${item.status==='pending'?`<button class="btn-sm blue" onclick="setStatus('${item.id}','watching')">▶ Empezar</button>`:''} ${item.status==='watching'?`<button class="btn-sm" onclick="setStatus('${item.id}','pending')">↩ Pendiente</button>`:''}
             ${item.status!=='done'?`<button class="btn-sm green" onclick="setStatus('${item.id}','done')">✓ Terminado</button>`:''}
             ${item.status==='done'?`<button class="btn-sm" onclick="setStatus('${item.id}','watching')">↺ Reanudar</button>`:''}
             <button class="btn-sm red" onclick="deleteItem('${item.id}')">✕</button>
@@ -530,7 +551,7 @@ function render(){
               <input type="number" min="0" value="${isMovie(item)?item.min||0:item.ep||0}"
                 onchange="${isMovie(item)?`updateMin('${item.id}',this.value)`:`updateEp('${item.id}',this.value)`}"/>
             </div>
-            ${minShow?`<div class="pf-group"><label>Minuto:</label><input type="number" min="0" value="${item.min||0}" onchange="updateMin('${item.id}',this.value)"/></div>`:''}
+            ${minShow?`<div class="pf-group"><label>Minuto:</label><input type="text" placeholder="00:00" maxlength="5" value="${item.min?formatMin(item.min):''}" onchange="updateMin('${item.id}',this.value)" style="width:72px"/></div>`:''}
           </div>
           <textarea class="note-field" placeholder="Nota o comentario..." onblur="saveNote('${item.id}',this.value)">${item.note||''}</textarea>
         </div>
@@ -579,15 +600,30 @@ async function searchSuggestions(q){
         subtitle:x.author_name?.[0]||''
       }));
     } else {
-      const mt=type==='pelicula'?'movie':'tv';
-      const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=es&page=1`);
-      const d=await r.json();
-      results=(d.results||[]).slice(0,6).map(x=>({
-        title:x.title||x.name,
-        year:(x.release_date||x.first_air_date||'').slice(0,4),
-        poster:x.poster_path?'https://image.tmdb.org/t/p/w92'+x.poster_path:null,
-        subtitle:''
-      }));
+      // search both movie and tv, pick the right one based on type
+      const endpoints = type==='pelicula' ? ['movie'] : type==='anime' ? ['tv','movie'] : ['tv','movie'];
+      let raw=[];
+      for(const mt of endpoints){
+        try{
+          const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=es&page=1`);
+          const d=await r.json();
+          raw=raw.concat((d.results||[]).map(x=>({
+            title:x.title||x.name,
+            year:(x.release_date||x.first_air_date||'').slice(0,4),
+            poster:x.poster_path?'https://image.tmdb.org/t/p/w92'+x.poster_path:null,
+            subtitle:'',
+            pop:x.popularity||0
+          })));
+        }catch(e){}
+      }
+      // deduplicate by title+year, sort by popularity
+      const seen=new Set();
+      raw.sort((a,b)=>b.pop-a.pop);
+      results=raw.filter(x=>{
+        const k=x.title+'|'+x.year;
+        if(seen.has(k))return false;
+        seen.add(k);return true;
+      }).slice(0,8);
     }
   }catch(e){return;}
 
