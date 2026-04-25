@@ -1047,7 +1047,7 @@ function setMood(mood,btn){
   btn.classList.add('active');
 }
 
-function refreshRecs(){document.getElementById('recGrid').innerHTML='';getRecommendations();}
+function refreshRecs(){document.getElementById('recGrid').innerHTML='';recHistory=recHistory.slice(0,-6);localStorage.setItem('recHistory',JSON.stringify(recHistory));getRecommendations();}
 
 // Normalize title for comparison (ignore case, accents, articles)
 function normalizeTitle(t){
@@ -1075,29 +1075,29 @@ async function getRecommendations(){
   const moodMap={surprise:'variedad sorprendente',light:'ligero y divertido',intense:'intenso y apasionante',romantic:'romantico con buena historia de amor',continue:'PRIORIZA continuaciones y temporadas siguientes de lo que ya tiene'};
   // Build exclude list with normalized comparison
   const allTitles=all.map(i=>i.title);
-  const exclude=[...new Set([...recHistory.slice(-20),...disliked,...allTitles])].join(', ');
+  const exclude=[...new Set([...recHistory.slice(-10),...disliked,...allTitles])].join(', ');
   const typeHint=typeFilter==='all'?`variedad (tiene muchos ${dominantType} asi que no solo eso)`:typeFilter;
 
   const prompt=`Lista del usuario: ${listStr}
 
-Recomienda 6 titulos de ${typeHint} con estas reglas:
+Recomienda 6 titulos DIFERENTES de ${typeHint}. Reglas:
 - Mood: ${moodMap[currentMood]||'sorprendeme'}
-- Si hay continuaciones o temporadas siguientes de titulos en la lista INCLUYELAS primero
-- NO incluyas nada de esta lista (ya en lista o rechazados): ${exclude||'ninguno'}
-- Solo titulos populares IMDB 7.5+ o MAL 8+ para anime
-- Disponibles en Netflix, Crunchyroll, HBO, Disney+, Amazon con subtitulos espanol latino
-- Solo libros de ficcion/novelas, NO manga
-- Variedad de tipos si el filtro es all
-- Usa el titulo mas conocido en Latinoamerica
+- Prioriza continuaciones/temporadas siguientes de titulos en la lista
+- NO repitas ninguno de estos: ${exclude||'ninguno'}
+- Mezcla: algunos clasicos muy queridos (IMDB 8+), algunos populares o de moda ahora aunque tengan 7+, y alguna joya menos conocida pero muy bien valorada
+- Disponibles con subtitulos espanol latino en cualquier plataforma
+- Para libros: solo novelas de ficcion, NO manga ni comics
+- Varía los tipos si el filtro es all, no pongas todo del mismo tipo
+- Titulo mas conocido en Latinoamerica
 
-SOLO JSON sin markdown:
-[{"title":"Titulo en espanol latino","titleEn":"English or romaji title","type":"anime","reason":"Por que le gustara max 10 palabras","platform":"Netflix","score":"8.5/10","detail":"2 oraciones de descripcion"}]`;
+SOLO JSON sin markdown, exactamente 6 items:
+[{"title":"Titulo","titleEn":"English/romaji title","type":"anime","reason":"Por que le gustara max 10 palabras","platform":"Netflix","score":"8.2/10","detail":"2 oraciones descripcion"}]`;
 
   try{
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.75,max_tokens:900})
+      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.95,max_tokens:900})
     });
     if(r.status===429)throw new Error('429');
     const d=await r.json();
