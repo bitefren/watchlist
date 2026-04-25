@@ -458,6 +458,7 @@ let currentMood=localStorage.getItem('recMood')||'surprise';
 let recHistory=JSON.parse(localStorage.getItem('recHistory')||'[]');
 let disliked=JSON.parse(localStorage.getItem('recDisliked')||'[]');
 let recPosters={};
+let sessionShownRecs=[];
 let posterCache={};
 let starModalId=null;
 let dragSrcId=null;
