@@ -1075,7 +1075,7 @@ async function getRecommendations(){
   const loading=document.getElementById('recLoading');
   const grid=document.getElementById('recGrid');
   btn.disabled=true;btn.textContent='...';
-  loading.classList.add('show');grid.innerHTML='';
+  loading.classList.add('show');loading.innerHTML='<span class="rec-loading-dots">Buscando recomendaciones</span>';grid.innerHTML='';
 
   const typeFilter=document.getElementById('recTypeFilter').value;
   const sorted=[...all].sort((a,b)=>{
@@ -1134,9 +1134,9 @@ SOLO JSON array, sin texto extra, exactamente 6 items:
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
           body:JSON.stringify({
-            model:'llama-3.3-70b-versatile',
+            model:'llama-3.1-8b-instant',
             messages:[
-              {role:'system',content:'You are a recommendation engine. Always respond with valid JSON array only, no other text.'},
+              {role:'system',content:'You are a JSON-only recommendation engine. Output ONLY a valid JSON array. No markdown, no explanation, no text before or after the array.'},
               {role:'user',content:prompt}
             ],
             temperature:0.9,max_tokens:1000,
@@ -1149,7 +1149,7 @@ SOLO JSON array, sin texto extra, exactamente 6 items:
         // extract array from response
         const m=raw.match(/\[[\s\S]*?\]/);
         if(m) text=m[0];
-      }catch(e){if(String(e).includes('429'))throw e; await new Promise(res=>setTimeout(res,1000));}
+      }catch(e){if(String(e).includes('429'))throw e; loading.innerHTML='<span class="rec-loading-dots">Reintentando</span> ('+attempts+'/3)'; await new Promise(res=>setTimeout(res,500));}
     }
     if(!text)throw new Error('no json');
     const clean=text;
