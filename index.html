@@ -307,19 +307,27 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
   <div id="panel-rec" style="display:none">
     <div class="rec-header">
       <div class="rec-title">✨ Para ti</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="sort-sel" id="recTypeFilter">
-          <option value="all">Todos los tipos</option>
-          <option value="serie">📺 Series</option>
-          <option value="pelicula">🎬 Películas</option>
-          <option value="anime">⚡ Anime</option>
-          <option value="kdrama">🌸 K-Dramas</option>
-          <option value="libro">📖 Libros</option>
-        </select>
-        <button class="btn-rec" id="btnRec" onclick="getRecommendations()">✦ Recomendar</button>
-      </div>
     </div>
-    <div class="rec-loading" id="recLoading">✨ Analizando tu lista...</div>
+    <div class="mood-bar">
+      <button class="mood-btn active" id="mood-surprise" onclick="setMood('surprise',this)">🎲 Sorpréndeme</button>
+      <button class="mood-btn" id="mood-light" onclick="setMood('light',this)">😄 Algo ligero</button>
+      <button class="mood-btn" id="mood-intense" onclick="setMood('intense',this)">🔥 Algo intenso</button>
+      <button class="mood-btn" id="mood-romantic" onclick="setMood('romantic',this)">💕 Algo romántico</button>
+      <button class="mood-btn" id="mood-continue" onclick="setMood('continue',this)">▶ Continuar sagas</button>
+    </div>
+    <div class="rec-controls">
+      <select class="sort-sel" id="recTypeFilter">
+        <option value="all">Todos los tipos</option>
+        <option value="serie">📺 Series</option>
+        <option value="pelicula">🎬 Películas</option>
+        <option value="anime">⚡ Anime</option>
+        <option value="kdrama">🌸 K-Dramas</option>
+        <option value="libro">📖 Libros</option>
+      </select>
+      <button class="btn-rec" id="btnRec" onclick="getRecommendations()">✦ Recomendar</button>
+      <button class="btn-rec" style="background:rgba(244,114,182,.15);border:1px solid rgba(244,114,182,.3);color:#f9a8d4" onclick="refreshRecs()">🔄 Nuevas</button>
+    </div>
+    <div class="rec-loading" id="recLoading"><span class="rec-loading-dots">Analizando tu lista</span></div>
     <div class="rec-grid" id="recGrid"></div>
 
 
@@ -740,8 +748,9 @@ document.getElementById('newType')?.addEventListener('change',()=>{
 
 const GROQ_KEY='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';
 let recPosters={};
-
-// Show rec section once items load
+let currentMood='surprise';
+let recHistory=JSON.parse(localStorage.getItem('recHistory')||'[]');
+let disliked=JSON.parse(localStorage.getItem('recDisliked')||'[]');
 
 function switchTab(tab){
   document.getElementById('panel-list').style.display=tab==='list'?'block':'none';
@@ -750,61 +759,96 @@ function switchTab(tab){
   document.getElementById('tab-rec').classList.toggle('active',tab==='rec');
   if(tab==='rec'&&document.getElementById('recGrid').innerHTML==='') getRecommendations();
 }
-function checkShowRec(){
-  const all=Object.values(items);
-  // rec tab always visible
+
+function checkShowRec(){}
+
+function setMood(mood,btn){
+  currentMood=mood;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function refreshRecs(){
+  document.getElementById('recGrid').innerHTML='';
+  getRecommendations();
 }
 
 async function getRecommendations(){
   const all=Object.values(items);
   if(all.length<2){showToast('Agrega más títulos primero');return;}
-  
+
   const btn=document.getElementById('btnRec');
   const loading=document.getElementById('recLoading');
   const grid=document.getElementById('recGrid');
-  
+
   btn.disabled=true; btn.textContent='...';
   loading.classList.add('show'); grid.innerHTML='';
 
   const typeFilter=document.getElementById('recTypeFilter').value;
-  
-  // Build compact list for prompt
-  const listStr=all.map(i=>`${i.title} (${i.type}${i.stars?', '+i.stars+'★':''}${i.status==='done'?' visto':''})`).join(', ');
-  const typeHint=typeFilter==='all'?'cualquier tipo (series, películas, anime, k-dramas, libros)':`principalmente ${typeFilter}`;
-  
-  const prompt=`Eres un experto en entretenimiento. Basándote en esta lista: ${listStr}
 
-Recomienda exactamente 6 títulos de ${typeHint} que cumplan TODOS estos criterios:
-- NO están ya en la lista
-- Son populares, bien valorados y reconocidos (IMDB 7+, MAL 7.5+ para anime, o muy populares)
-- Disponibles en español latino o con subtítulos en español en plataformas populares (Netflix, Crunchyroll, HBO, Disney+, Amazon, Spotify, etc)
-- Nada de contenido oscuro, desconocido o de baja calidad
+  // Build weighted list — done+stars first
+  const sorted=[...all].sort((a,b)=>{
+    const wa=(a.status==='done'?2:a.status==='watching'?1:0)+(a.stars||0);
+    const wb=(b.status==='done'?2:b.status==='watching'?1:0)+(b.stars||0);
+    return wb-wa;
+  });
+  const listStr=sorted.map(i=>`${i.title}(${i.type}${i.stars?','+i.stars+'★':''}${i.status==='done'?',visto':''})`).join(', ');
+
+  // Count types for variety hint
+  const typeCounts={};
+  all.forEach(i=>{typeCounts[i.type]=(typeCounts[i.type]||0)+1;});
+  const dominantType=Object.entries(typeCounts).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+  // Mood instructions
+  const moodMap={
+    surprise:'variedad sorprendente, mezcla géneros',
+    light:'ligero, divertido, sin drama intenso',
+    intense:'intenso, apasionante, lleno de acción o drama',
+    romantic:'romántico, con buena historia de amor',
+    continue:'PRIORIZA continuaciones/temporadas siguientes de lo que ya tiene en lista'
+  };
+
+  // Already seen/disliked
+  const exclude=[...recHistory.slice(-20),...disliked,...all.map(i=>i.title)].join(', ');
+  const typeHint=typeFilter==='all'?`variedad (tiene muchos ${dominantType} así que no recomiendes solo eso)`:`principalmente ${typeFilter}`;
+
+  const prompt=`Eres experto en entretenimiento. Lista del usuario: ${listStr}
+
+Recomienda 6 títulos de ${typeHint} con estas reglas ESTRICTAS:
+- Mood del usuario hoy: ${moodMap[currentMood]||'sorpréndeme'}
+- Si hay continuaciones/temporadas siguientes de títulos en la lista, INCLÚYELAS primero
+- NO incluyas estos títulos (ya vistos o rechazados): ${exclude||'ninguno'}
+- Solo títulos populares y bien valorados (IMDB 7.5+ o MAL 8+ para anime)
+- Solo libros de ficción/novelas, NO manga ni novelas gráficas para tipo "libro"
+- Disponibles en Netflix, Crunchyroll, HBO, Disney+, Amazon o con subtítulos español latino
 - Usa el título más conocido en Latinoamérica
+- Varía los tipos si el filtro es "all"
 
-Responde SOLO en JSON sin markdown:
-[{"title":"Título conocido","type":"anime","reason":"Razón corta máx 10 palabras","platform":"Netflix"}]`;
+Responde SOLO JSON sin markdown:
+[{"title":"Título","type":"anime","reason":"Por qué le gustará (máx 10 palabras)","platform":"Netflix","score":"8.5/10","detail":"Explicación más detallada en 2 oraciones"}]`;
 
   try{
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.7,max_tokens:600})
+      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.75,max_tokens:900})
     });
     if(r.status===429) throw new Error('429');
     const d=await r.json();
     const text=d.choices?.[0]?.message?.content||'';
     const clean=text.replace(/```json|```/g,'').trim();
     const recs=JSON.parse(clean);
-    
+
+    // Save to history
+    recHistory=[...recHistory,...recs.map(r=>r.title)].slice(-50);
+    localStorage.setItem('recHistory',JSON.stringify(recHistory));
+
     loading.classList.remove('show');
     renderRecs(recs);
   }catch(e){
     loading.classList.remove('show');
-    if(e.message&&e.message.includes('429')||String(e).includes('429')){
-      showToast('Límite alcanzado, espera 30 segundos ⏳');
-    } else {
-      showToast('Error al obtener recomendaciones, intenta de nuevo');
-    }
+    if(String(e).includes('429')) showToast('Límite alcanzado, espera 30s ⏳');
+    else showToast('Error al obtener recomendaciones, intenta de nuevo');
   }
   btn.disabled=false; btn.textContent='✦ Recomendar';
 }
@@ -820,12 +864,12 @@ async function fetchRecPoster(title,type){
       const cid=d.docs?.[0]?.cover_i;
       if(cid) recPosters[title]=`https://covers.openlibrary.org/b/id/${cid}-M.jpg`;
     } else {
-      const mt=(type==='pelicula')?'movie':'tv';
+      const mt=type==='pelicula'?'movie':'tv';
       const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=en-US`);
       const d=await r.json();
       const poster=d.results?.[0]?.poster_path;
       if(poster) recPosters[title]='https://image.tmdb.org/t/p/w185'+poster;
-      else {
+      else{
         const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${type==='pelicula'?'movie':'tvSeason'}&limit=1`);
         const id=await ir.json();
         const art=id.results?.[0]?.artworkUrl100;
@@ -838,29 +882,70 @@ async function fetchRecPoster(title,type){
 
 const recTypeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
 
-function addRecToList(title,type){
-  // Check not already in list
+function addRecToList(title,type,btnEl){
   const exists=Object.values(items).some(i=>i.title.toLowerCase()===title.toLowerCase());
   if(exists){showToast('Ya está en tu lista');return;}
   const id=Date.now().toString();
   ref.child(id).set({id,title,type,total:null,ep:0,min:0,status:'pending',addedBy:myName||'Anon',ts:id,stars:0,note:'',doneDate:null});
   fetchPoster(title,type);
   showToast('✓ Agregado a pendientes');
+  if(btnEl){btnEl.textContent='✓ Agregado';btnEl.classList.add('added');btnEl.disabled=true;}
+}
+
+function voteRec(title,vote,el){
+  if(vote===-1){
+    disliked=[...disliked,title].slice(-30);
+    localStorage.setItem('recDisliked',JSON.stringify(disliked));
+    showToast('👎 No te gustó, no lo recomendaremos de nuevo');
+    el.closest('.rec-card').style.opacity='0.3';
+  } else {
+    showToast('👍 ¡Genial! Tendremos eso en cuenta');
+  }
+}
+
+function toggleDetail(id){
+  const el=document.getElementById('rec-detail-'+id);
+  if(el) el.classList.toggle('show');
+}
+
+function shareRec(title,reason){
+  const text=`👀 Me recomendaron ver: *${title}*\n_${reason}_\n\nVisto en nuestra Watchlist 🎬`;
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
 function renderRecs(recs){
   const grid=document.getElementById('recGrid');
-  grid.innerHTML=recs.map((r,i)=>`
-    <div class="rec-card" id="rec-${i}">
-      <div class="rec-poster-ph" id="rec-ph-${i}">${recTypeEmoji[r.type]||'🎬'}</div>
+  grid.innerHTML=recs.map((r,i)=>{
+    const inList=Object.values(items).some(it=>it.title.toLowerCase()===r.title.toLowerCase());
+    const safetitle=r.title.replace(/'/g,"\'").replace(/"/g,'&quot;');
+    return `<div class="rec-card" id="rec-${i}">
+      <div class="rec-poster-wrap">
+        <div class="rec-poster-ph" id="rec-ph-${i}">${recTypeEmoji[r.type]||'🎬'}</div>
+        <span class="rec-badge ${r.type}">${recTypeEmoji[r.type]} ${r.type}</span>
+        <div class="rec-overlay">
+          <button class="rec-add-btn ${inList?'added':''}" id="rec-add-${i}" onclick="addRecToList('${safetitle}','${r.type}',this)" ${inList?'disabled':''}>
+            ${inList?'✓ En lista':'+ Agregar'}
+          </button>
+          <div class="rec-vote">
+            <button onclick="voteRec('${safetitle}',1,this)" title="Me gusta">👍</button>
+            <button onclick="voteRec('${safetitle}',-1,this)" title="No me gusta">👎</button>
+            <button class="rec-share" onclick="shareRec('${safetitle}','${(r.reason||'').replace(/'/g,"\'")}')" title="Compartir por WhatsApp">💬</button>
+          </div>
+          <button class="rec-expand-btn" onclick="toggleDetail(${i})">Ver más info</button>
+        </div>
+      </div>
       <div class="rec-info">
         <div class="rec-name">${r.title}</div>
-        <div class="rec-why">${r.reason}</div>
-        ${r.platform?`<div class="rec-platform">${r.platform}</div>`:''}
-        <button class="rec-add-btn" onclick="addRecToList('${r.title.replace(/'/g,"\'")}','${r.type}')">+ Agregar</button>
+        <div class="rec-meta">
+          ${r.score?`<span class="rec-score">★ ${r.score}</span>`:''}
+          ${r.platform?`<span class="rec-platform">${r.platform}</span>`:''}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">${r.reason||''}</div>
+        ${r.detail?`<div class="rec-why-text" id="rec-detail-${i}">${r.detail}</div>`:''}
       </div>
-    </div>`).join('');
-  
+    </div>`;
+  }).join('');
+
   recs.forEach((r,i)=>{
     fetchRecPoster(r.title,r.type).then(poster=>{
       if(poster){
