@@ -1249,7 +1249,7 @@ function renderOneRec(r,container){
         <div class="rec-vote">
           <button onclick="voteRec('${safetitle}',1,this)">+1</button>
           <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-          <button onclick="shareRec('${safetitle}','${safereason}','${rtype}','${(r.platform||'').replace(/'/g,\"'\")  }','${r.score||''}','${(r.detail||'').replace(/'/g,\"'\")}' )">WA</button>
+          <button onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
           ${r.detail?`<button onclick="this.closest('.rec-info').querySelector('.rec-why-text').classList.toggle('show')">...</button>`:''}
         </div>
       </div>
@@ -1261,16 +1261,16 @@ function renderOneRec(r,container){
 
 function toggleDetail(i){const el=document.getElementById('rec-detail-'+i);if(el)el.classList.toggle('show');}
 
-function shareRec(title,reason,type,platform,score,detail){
+function shareRec(btn){
+  const title=btn.dataset.title||'';
+  const reason=btn.dataset.reason||'';
+  const type=btn.dataset.type||'serie';
+  const platform=btn.dataset.platform||'';
+  const score=btn.dataset.score||'';
   const base='https://bitefren.github.io/share.html';
-  const params=new URLSearchParams({
-    id:Date.now(),type:'rec',
-    title:title||'',t:type||'serie',
-    reason:reason||'',platform:platform||'',
-    score:score||'',detail:detail||''
-  });
+  const params=new URLSearchParams({id:Date.now(),type:'rec',title,t:type,reason,platform,score});
   const link=base+'?'+params.toString();
-  const text=`Te recomiendo: *${title}*\n_${reason}_\n\n${link}`;
+  const text='Te recomiendo: *'+title+'*\n_'+reason+'_\n\n'+link;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -1300,7 +1300,7 @@ function renderRecs(recs){
           <div class="rec-vote">
             <button onclick="voteRec('${safetitle}',1,this)">+1</button>
             <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-            <button onclick="shareRec('${safetitle}','${safereason}','${rtype}','${(r.platform||'').replace(/'/g,\"'\")  }','${r.score||''}','${(r.detail||'').replace(/'/g,\"'\")}' )">WA</button>
+            <button onclick="shareRec(this)" data-title="${safetitle}" data-reason="${safereason}" data-type="${rtype}" data-platform="${r.platform||''}" data-score="${r.score||''}">WA</button>
             ${r.detail?`<button onclick="toggleDetail(${i})">...</button>`:''}
           </div>
         </div>
