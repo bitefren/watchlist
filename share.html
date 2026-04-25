@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Watchlist</title>
+<link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d070f;--glass:rgba(255,182,208,.04);--glass-border:rgba(244,114,182,.12);--accent:#f472b6;--gold:#fbbf24;--text:#fce7f3;--muted:#9d6b7e}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;position:relative;overflow-x:hidden}
+
+/* bg */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+.orb1{width:500px;height:500px;background:#f472b6;top:-100px;left:-100px}
+.orb2{width:400px;height:400px;background:#ec4899;bottom:-80px;right:-80px}
+.orb3{width:300px;height:300px;background:#f9a8d4;top:40%;left:40%}
+
+/* stars */
+.stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* card */
+.share-wrap{position:relative;z-index:1;max-width:420px;width:100%;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+.share-logo{text-align:center;margin-bottom:1.5rem}
+.share-logo a{font-family:'Philosopher',serif;font-size:22px;font-weight:700;font-style:italic;background:linear-gradient(135deg,#fce7f3,#f472b6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none}
+
+.card{background:rgba(255,182,208,.04);border:1px solid rgba(244,114,182,.15);border-radius:20px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+
+.card-poster-wrap{position:relative;width:100%;aspect-ratio:2/3;max-height:380px;overflow:hidden}
+.card-poster{width:100%;height:100%;object-fit:cover;display:block}
+.card-poster-ph{width:100%;height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(160deg,#1a0a14,#0d070f)}
+.poster-gradient{position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,rgba(13,7,15,1),transparent)}
+
+.badge{position:absolute;top:14px;left:14px;font-size:11px;padding:4px 10px;border-radius:8px;font-weight:700;font-family:'Nunito',sans-serif;text-transform:uppercase;letter-spacing:.05em;backdrop-filter:blur(8px)}
+.badge.serie{background:rgba(244,114,182,.85);color:#fff}
+.badge.pelicula{background:rgba(251,191,36,.9);color:#1a0a00}
+.badge.anime{background:rgba(236,72,153,.85);color:#fff}
+.badge.pelianime{background:rgba(99,102,241,.85);color:#fff}
+.badge.kdrama{background:rgba(251,113,133,.85);color:#fff}
+.badge.libro{background:rgba(249,168,212,.9);color:#1a0a14}
+
+.card-body{padding:1.5rem}
+.card-title{font-family:'Philosopher',serif;font-size:26px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:.5rem}
+.card-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:1rem}
+.card-score{font-size:14px;color:var(--gold);font-weight:600}
+.card-platform{font-size:13px;color:rgba(244,114,182,.8);font-weight:500}
+.card-status{font-size:13px;color:var(--muted)}
+.card-reason{font-size:14px;color:rgba(249,168,212,.7);line-height:1.6;margin-bottom:.5rem;font-style:italic}
+.card-detail{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:1.25rem}
+.card-stars{display:flex;gap:4px;margin-bottom:1.25rem}
+.card-star{font-size:18px;color:var(--gold);opacity:.25}
+.card-star.lit{opacity:1}
+.card-note{font-size:13px;color:rgba(249,168,212,.5);font-style:italic;margin-bottom:1.25rem;padding:8px 12px;background:rgba(244,114,182,.05);border-left:2px solid rgba(244,114,182,.3);border-radius:0 8px 8px 0}
+
+.btn-add{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#ec4899,#f472b6);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .2s,transform .1s;margin-bottom:.75rem}
+.btn-add:hover{opacity:.88}
+.btn-add:active{transform:scale(.98)}
+.btn-add.added{background:rgba(249,168,212,.15);border:1px solid rgba(249,168,212,.3);color:#f9a8d4}
+
+.btn-list{display:block;width:100%;padding:11px;background:transparent;border:1px solid rgba(244,114,182,.3);border-radius:12px;color:var(--accent);font-size:14px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;text-align:center;text-decoration:none;transition:all .2s}
+.btn-list:hover{background:rgba(244,114,182,.08)}
+
+.share-footer{text-align:center;margin-top:1.25rem;font-size:12px;color:rgba(157,107,126,.5)}
+.share-footer a{color:rgba(244,114,182,.5);text-decoration:none}
+.share-footer a:hover{color:var(--accent)}
+
+.loading{text-align:center;padding:4rem 2rem}
+.loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin:0 3px;animation:bounce .8s infinite alternate}
+.loading-dot:nth-child(2){animation-delay:.2s}
+.loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{from{opacity:.3;transform:translateY(0)}to{opacity:1;transform:translateY(-8px)}}
+
+.error{text-align:center;padding:3rem 2rem;color:var(--muted)}
+.error-icon{font-size:40px;margin-bottom:1rem}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+<canvas class="stars" id="starsCanvas"></canvas>
+
+<div class="share-wrap">
+  <div class="share-logo">
+    <a href="https://bitefren.github.io/watchlist">✦ Watchlist</a>
+  </div>
+  <div id="content">
+    <div class="loading">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+  </div>
+  <div class="share-footer">Compartido desde <a href="https://bitefren.github.io/watchlist">nuestra Watchlist</a></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyAlGAHZxlQm0gGVdpInRxORLW4plhRo9v4",
+  authDomain:"nanayyo-bd393.firebaseapp.com",
+  databaseURL:"https://nanayyo-bd393-default-rtdb.firebaseio.com",
+  projectId:"nanayyo-bd393",
+  storageBucket:"nanayyo-bd393.firebasestorage.app",
+  messagingSenderId:"465841132382",
+  appId:"1:465841132382:web:fa1f9826a7c06bd98635cf"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',pelianime:'🎌',libro:'📖',kdrama:'🌸'};
+const statusLbl={pending:'Pendiente',watching:'Viendo',done:'Terminado'};
+const TMDB_KEY='648178e349ec83cbabf8e5f055a8fd8b';
+
+// draw stars
+const canvas=document.getElementById('starsCanvas');
+const ctx=canvas.getContext('2d');
+function drawStars(){
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<80;i++){
+    const x=Math.random()*canvas.width,y=Math.random()*canvas.height,r=Math.random()*1.2+.3;
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${Math.random()*.4+.1})`;ctx.fill();
+  }
+}
+drawStars();window.addEventListener('resize',drawStars);
+
+// get share id from URL
+const params=new URLSearchParams(window.location.search);
+const shareId=params.get('id');
+const shareType=params.get('type')||'item'; // 'item' or 'rec'
+
+if(!shareId){showError('Link invalido');} else {loadContent();}
+
+async function loadContent(){
+  if(shareType==='rec'){
+    // recommendation shared — data in URL params
+    const title=params.get('title')||'';
+    const type=params.get('t')||'serie';
+    const reason=params.get('reason')||'';
+    const platform=params.get('platform')||'';
+    const score=params.get('score')||'';
+    const detail=params.get('detail')||'';
+    renderRec({title,type,reason,platform,score,detail});
+  } else {
+    // item from watchlist
+    try{
+      const snap=await db.ref('watchlist/'+shareId).once('value');
+      const item=snap.val();
+      if(!item){showError('Contenido no encontrado');return;}
+      renderItem(item);
+    }catch(e){showError('Error al cargar');}
+  }
+}
+
+async function getPoster(title,type){
+  try{
+    const mt=(type==='pelicula'||type==='pelianime')?'movie':'tv';
+    const q=encodeURIComponent(title);
+    // try both endpoints
+    for(const endpoint of [mt,'multi']){
+      const r=await fetch(`https://api.themoviedb.org/3/search/${endpoint}?api_key=${TMDB_KEY}&query=${q}&language=en-US`);
+      const d=await r.json();
+      const p=(d.results||[]).find(x=>x.poster_path)?.poster_path;
+      if(p)return'https://image.tmdb.org/t/p/w400'+p;
+    }
+    // iTunes fallback
+    const entity=(type==='pelicula'||type==='pelianime')?'movie':'tvSeason';
+    const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${entity}&limit=3`);
+    const id=await ir.json();
+    const art=(id.results||[]).find(x=>x.artworkUrl100)?.artworkUrl100;
+    if(art)return art.replace('100x100bb','600x600bb');
+  }catch(e){}
+  return null;
+}
+
+function starsHTML(n){
+  return[1,2,3,4,5].map(i=>`<span class="card-star ${i<=n?'lit':''}">★</span>`).join('');
+}
+
+async function renderItem(item){
+  const t=item.type||'serie';
+  const poster=await getPoster(item.title,t);
+  const inList=false; // will check after render
+
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-poster-wrap">
+        ${poster
+          ?`<img class="card-poster" src="${poster}" alt="${item.title}" onerror="this.parentNode.innerHTML='<div class=card-poster-ph>${typeEmoji[t]||'🎬'}</div><div class=poster-gradient></div>'">`
+          :`<div class="card-poster-ph">${typeEmoji[t]||'🎬'}</div>`}
+        <div class="poster-gradient"></div>
+        <span class="badge ${t}">${typeEmoji[t]||''} ${t}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${item.title||''}</div>
+        <div class="card-meta">
+          <span class="card-status">${statusLbl[item.status]||item.status||''}</span>
+          ${item.stars?`<span class="card-score">★ ${item.stars}/5</span>`:''}
+        </div>
+        ${item.stars?`<div class="card-stars">${starsHTML(item.stars)}</div>`:''}
+        ${item.note?`<div class="card-note">"${item.note}"</div>`:''}
+        <button class="btn-add" id="btnAdd" onclick="addToList(${JSON.stringify(item).replace(/"/g,'&quot;')})">+ Agregar a mi lista</button>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ver lista completa</a>
+      </div>
+    </div>`;
+}
+
+async function renderRec(r){
+  const t=r.type||'serie';
+  const poster=await getPoster(r.title,t);
+
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-poster-wrap">
+        ${poster
+          ?`<img class="card-poster" src="${poster}" alt="${r.title}" onerror="this.parentNode.innerHTML='<div class=card-poster-ph>${typeEmoji[t]||'🎬'}</div><div class=poster-gradient></div>'">`
+          :`<div class="card-poster-ph">${typeEmoji[t]||'🎬'}</div>`}
+        <div class="poster-gradient"></div>
+        <span class="badge ${t}">${typeEmoji[t]||''} ${t}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${r.title||''}</div>
+        <div class="card-meta">
+          ${r.score?`<span class="card-score">★ ${r.score}</span>`:''}
+          ${r.platform?`<span class="card-platform">${r.platform}</span>`:''}
+        </div>
+        ${r.reason?`<div class="card-reason">"${r.reason}"</div>`:''}
+        ${r.detail?`<div class="card-detail">${r.detail}</div>`:''}
+        <button class="btn-add" id="btnAdd" onclick="addRecToList('${(r.title||'').replace(/'/g,"\\'")}','${t}',this)">+ Agregar a mi lista</button>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ver lista completa</a>
+      </div>
+    </div>`;
+}
+
+function addToList(item){
+  const id=Date.now().toString();
+  db.ref('watchlist/'+id).set({
+    id,title:item.title,type:item.type,total:null,
+    ep:0,min:0,status:'pending',addedBy:'Invitado',
+    ts:id,stars:0,note:'',doneDate:null,history:[]
+  });
+  const btn=document.getElementById('btnAdd');
+  if(btn){btn.textContent='Agregado';btn.classList.add('added');btn.disabled=true;}
+}
+
+function addRecToList(title,type,btn){
+  const id=Date.now().toString();
+  db.ref('watchlist/'+id).set({
+    id,title,type,total:null,ep:0,min:0,
+    status:'pending',addedBy:'Invitado',
+    ts:id,stars:0,note:'',doneDate:null,history:[]
+  });
+  if(btn){btn.textContent='Agregado';btn.classList.add('added');btn.disabled=true;}
+}
+
+function showError(msg){
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="card-body" style="text-align:center;padding:3rem">
+        <div style="font-size:40px;margin-bottom:1rem">✦</div>
+        <div style="font-family:'Philosopher',serif;font-size:20px;color:#fff;margin-bottom:.5rem">${msg}</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:1.5rem">El link puede haber expirado o ser invalido</div>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ir a la Watchlist</a>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>
