@@ -1077,7 +1077,16 @@ async function getRecommendations(){
   // Build exclude list with normalized comparison
   const allTitles=all.map(i=>i.title);
   const exclude=[...new Set([...recHistory.slice(-10),...disliked,...allTitles])].join(', ');
-  const typeHint=typeFilter==='all'?`variedad (tiene muchos ${dominantType} asi que no solo eso)`:typeFilter;
+  const typeDescriptions={
+    'serie':'series de television live action (NO anime, NO k-drama)',
+    'pelicula':'peliculas live action (NO animadas, NO anime)',
+    'anime':'series de anime japones (NO peliculas)',
+    'pelianime':'peliculas de anime japones como Ghibli, Demon Slayer Movie, Your Name, Spirited Away (SOLO peliculas anime, NO series, NO live action)',
+    'kdrama':'dramas coreanos (k-dramas)',
+    'libro':'novelas y libros de ficcion (NO manga, NO comics, NO novelas graficas)',
+    'all':`variedad (tiene muchos ${dominantType} asi que no solo ese tipo)`
+  };
+  const typeHint=typeDescriptions[typeFilter]||typeFilter;
 
   const prompt=`Lista del usuario: ${listStr}
 
