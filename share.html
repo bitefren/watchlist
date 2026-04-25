@@ -88,7 +88,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
 
 <div class="share-wrap">
   <div class="share-logo">
-    <a href="https://bitefren.github.io/watchlist">✦ Watchlist</a>
+    <a href="https://bitefren.github.io/watchlist/">✦ Watchlist</a>
   </div>
   <div id="content">
     <div class="loading">
@@ -97,7 +97,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="loading-dot"></div>
     </div>
   </div>
-  <div class="share-footer">Compartido desde <a href="https://bitefren.github.io/watchlist">nuestra Watchlist</a></div>
+  <div class="share-footer">Compartido desde <a href="https://bitefren.github.io/watchlist/">nuestra Watchlist</a></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -209,7 +209,7 @@ async function renderItem(item){
         ${item.stars?`<div class="card-stars">${starsHTML(item.stars)}</div>`:''}
         ${item.note?`<div class="card-note">"${item.note}"</div>`:''}
         <button class="btn-add" id="btnAdd" onclick="addToList(${JSON.stringify(item).replace(/"/g,'&quot;')})">+ Agregar a mi lista</button>
-        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ver lista completa</a>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist/">Ver lista completa</a>
       </div>
     </div>`;
 }
@@ -236,7 +236,7 @@ async function renderRec(r){
         ${r.reason?`<div class="card-reason">"${r.reason}"</div>`:''}
         ${r.detail?`<div class="card-detail">${r.detail}</div>`:''}
         <button class="btn-add" id="btnAdd" onclick="addRecToList('${(r.title||'').replace(/'/g,"\\'")}','${t}',this)">+ Agregar a mi lista</button>
-        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ver lista completa</a>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist/">Ver lista completa</a>
       </div>
     </div>`;
 }
@@ -269,7 +269,7 @@ function showError(msg){
         <div style="font-size:40px;margin-bottom:1rem">✦</div>
         <div style="font-family:'Philosopher',serif;font-size:20px;color:#fff;margin-bottom:.5rem">${msg}</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:1.5rem">El link puede haber expirado o ser invalido</div>
-        <a class="btn-list" href="https://bitefren.github.io/watchlist">Ir a la Watchlist</a>
+        <a class="btn-list" href="https://bitefren.github.io/watchlist/">Ir a la Watchlist</a>
       </div>
     </div>`;
 }
