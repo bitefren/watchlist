@@ -715,7 +715,7 @@ document.getElementById('newType')?.addEventListener('change',()=>{
 });
 
 
-const GEMINI_KEY='AIzaSyAmdlDL23is33EdIQRSAro8Dl418qDW4vI';
+const GROQ_KEY='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';
 let recPosters={};
 
 // Show rec section once items load
@@ -752,13 +752,14 @@ Responde SOLO en JSON, sin markdown, así:
 [{"title":"Nombre","type":"anime","reason":"Porque te gustó X y tiene acción similar"}]`;
 
   try{
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:600}})
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.7,max_tokens:600})
     });
+    if(r.status===429) throw new Error('429');
     const d=await r.json();
-    const text=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const text=d.choices?.[0]?.message?.content||'';
     const clean=text.replace(/```json|```/g,'').trim();
     const recs=JSON.parse(clean);
     
@@ -766,7 +767,11 @@ Responde SOLO en JSON, sin markdown, así:
     renderRecs(recs);
   }catch(e){
     loading.classList.remove('show');
-    showToast('Error al obtener recomendaciones, intenta de nuevo');
+    if(e.message&&e.message.includes('429')||String(e).includes('429')){
+      showToast('Límite alcanzado, espera 30 segundos ⏳');
+    } else {
+      showToast('Error al obtener recomendaciones, intenta de nuevo');
+    }
   }
   btn.disabled=false; btn.textContent='✦ Recomendar';
 }
