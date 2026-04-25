@@ -641,7 +641,7 @@ function updateMin(id,val){
   ref.child(id).update(upd);
 }
 function setStars(id,n){ref.child(id).update({stars:n});showToast(['','★','★★','★★★','★★★★','★★★★★'][n]);}
-function saveNote(id,val){ref.child(id).update({note:val.trim()});}
+function saveNote(id,val){const trimmed=val.trim();if(trimmed!==(items[id]?.note||''))ref.child(id).update({note:trimmed});}
 function startEditTitle(id){
   const item=items[id];if(!item)return;
   const titleEl=document.getElementById('title-text-'+id);
@@ -658,7 +658,7 @@ function saveTitle(id,val){
 // ── DAYS WATCHING ──
 function daysWatching(item){
   if(item.status!=='watching'||!item.watchStartTs)return null;
-  return Math.floor((Date.now()-item.watchStartTs)/(1000*60*60*24));
+  return Math.max(0,Math.floor((Date.now()-item.watchStartTs)/(1000*60*60*24)));
 }
 
 // ── PROGRESS PCT ──
@@ -959,10 +959,11 @@ function render(){
   if(vt)vt.textContent=compactView?'Normal':'Compacto';
 }
 
-function shareItem(id){
+async function shareItem(id){
   const item=items[id];if(!item)return;
-  const link='https://bitefren.github.io/watchlist/share.html?id='+id+'&type=item';
-  const text=`Mira lo que tengo en mi lista: *${item.title}*\n\n${link}`;
+  const longLink='https://bitefren.github.io/watchlist/share.html?id='+id+'&type=item';
+  const link=await shortenUrl(longLink);
+  const text='Mira lo que tengo en mi lista: *'+item.title+'*\n\n'+link;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -1050,9 +1051,14 @@ function pickSuggestion(i){
 
 // ── RECOMMENDATIONS ──
 function setMood(mood,btn){
-  currentMood=mood;localStorage.setItem('recMood',mood);
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  if(currentMood===mood){
+    currentMood=null;localStorage.removeItem('recMood');
+    btn.classList.remove('active');
+  } else {
+    currentMood=mood;localStorage.setItem('recMood',mood);
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
 }
 
 function refreshRecs(){recHistory=[];localStorage.setItem('recHistory','[]');document.getElementById('recGrid').innerHTML='';getRecommendations();}
@@ -1098,7 +1104,7 @@ async function getRecommendations(){
   const prompt=`Lista del usuario: ${listStr}
 
 Recomienda 6 titulos DIFERENTES de ${typeHint}. Reglas:
-- Mood: ${moodMap[currentMood]||'sorprendeme'}
+- Mood: ${currentMood?moodMap[currentMood]:'libre, sorprendeme con variedad'}
 - Prioriza continuaciones/temporadas siguientes de titulos en la lista
 - NO repitas ninguno de estos: ${exclude||'ninguno'}
 - Mezcla: algunos clasicos muy queridos (IMDB 8+), algunos populares o de moda ahora aunque tengan 7+, y alguna joya menos conocida pero muy bien valorada
@@ -1125,7 +1131,7 @@ SOLO JSON sin markdown, exactamente 6 items:
               {role:'user',content:prompt}
             ],
             temperature:0.9,max_tokens:1000,
-            response_format:{type:'json_object'}
+
           })
         });
         if(r.status===429)throw new Error('429');
@@ -1154,7 +1160,7 @@ SOLO JSON sin markdown, exactamente 6 items:
       return!listNorm.some(l=>l===normEs||l===normEn||(normEn&&l.includes(normEn))||(normEs&&l.includes(normEs)));
     });
 
-    recHistory=[...recHistory,...recs.map(r=>r.title)].slice(-50);
+    recHistory=[...new Set([...recHistory,...recs.map(r=>r.title)])].slice(-50);
     localStorage.setItem('recHistory',JSON.stringify(recHistory));
     loading.classList.remove('show');
     renderRecs(recs);
@@ -1208,7 +1214,7 @@ async function getOneMoreRec(excludeTitle){
   try{
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],temperature:0.8,max_tokens:200})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:'Respond with valid JSON array only.'},{role:'user',content:prompt}],temperature:0.9,max_tokens:300})
     });
     const d=await r.json();
     const text=d.choices?.[0]?.message?.content||'';
@@ -1260,7 +1266,15 @@ function renderOneRec(r,container){
 
 function toggleDetail(i){const el=document.getElementById('rec-detail-'+i);if(el)el.classList.toggle('show');}
 
-function shareRec(btn){
+async function shortenUrl(url){
+  try{
+    const r=await fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(url));
+    if(r.ok) return await r.text();
+  }catch(e){}
+  return url;
+}
+
+async function shareRec(btn){
   const title=btn.dataset.title||'';
   const reason=btn.dataset.reason||'';
   const type=btn.dataset.type||'serie';
@@ -1268,7 +1282,8 @@ function shareRec(btn){
   const score=btn.dataset.score||'';
   const base='https://bitefren.github.io/watchlist/share.html';
   const params=new URLSearchParams({id:Date.now(),type:'rec',title,t:type,reason,platform,score});
-  const link=base+'?'+params.toString();
+  const longLink=base+'?'+params.toString();
+  const link=await shortenUrl(longLink);
   const text='Te recomiendo: *'+title+'*\n_'+reason+'_\n\n'+link;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
