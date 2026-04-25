@@ -1092,13 +1092,13 @@ async function getRecommendations(){
   const allTitles=all.map(i=>i.title);
   const exclude=[...new Set([...sessionShownRecs,...disliked,...allTitles])].join(', ');
   const typeDescriptions={
-    'serie':'series de television live action (NO anime, NO k-drama)',
-    'pelicula':'peliculas live action (NO animadas, NO anime)',
-    'anime':'series de anime japones (NO peliculas)',
-    'pelianime':'peliculas de anime japones como Ghibli, Demon Slayer Movie, Your Name, Spirited Away (SOLO peliculas anime, NO series, NO live action)',
-    'kdrama':'dramas coreanos (k-dramas)',
-    'libro':'novelas y libros de ficcion (NO manga, NO comics, NO novelas graficas)',
-    'all':`variedad (tiene muchos ${dominantType} asi que no solo ese tipo)`
+    'serie':'series de television live action en ingles o espanol (ejemplos: Breaking Bad, Game of Thrones, Stranger Things) - ABSOLUTAMENTE NO anime, NO animacion, NO k-drama',
+    'pelicula':'peliculas live action en ingles o espanol (ejemplos: Inception, Interstellar, El Padrino) - ABSOLUTAMENTE NO animadas, NO anime, NO dibujos',
+    'anime':'UNICAMENTE series de anime japones con animacion japonesa (ejemplos: Naruto, Attack on Titan, Demon Slayer, One Piece) - NO live action, NO series occidentales, NO peliculas',
+    'pelianime':'UNICAMENTE peliculas de anime japones (ejemplos: Spirited Away, Your Name, Demon Slayer Movie, Dragon Ball Super Broly) - NO series, NO live action, NO animacion occidental',
+    'kdrama':'UNICAMENTE dramas coreanos (ejemplos: Crash Landing on You, Goblin, Squid Game) - NO anime, NO series occidentales',
+    'libro':'UNICAMENTE novelas de ficcion o no ficcion (ejemplos: Harry Potter, El Senor de los Anillos, Dune) - ABSOLUTAMENTE NO manga, NO comics, NO novelas graficas, NO webtoons',
+    'all':`variedad equilibrada de tipos (el usuario tiene muchos ${dominantType} asi que incluye otros tipos tambien)`
   };
   const typeHint=typeDescriptions[typeFilter]||typeFilter;
 
