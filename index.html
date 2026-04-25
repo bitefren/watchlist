@@ -1089,7 +1089,7 @@ async function getRecommendations(){
   const moodMap={surprise:'variedad sorprendente',light:'ligero y divertido',intense:'intenso y apasionante',romantic:'romantico con buena historia de amor',continue:'PRIORIZA continuaciones y temporadas siguientes de lo que ya tiene'};
   // Build exclude list with normalized comparison
   const allTitles=all.map(i=>i.title);
-  const exclude=[...new Set([...recHistory.slice(-10),...disliked,...allTitles])].join(', ');
+  const exclude=[...new Set([...sessionShownRecs,...disliked,...allTitles])].join(', ');
   const typeDescriptions={
     'serie':'series de television live action (NO anime, NO k-drama)',
     'pelicula':'peliculas live action (NO animadas, NO anime)',
@@ -1101,20 +1101,29 @@ async function getRecommendations(){
   };
   const typeHint=typeDescriptions[typeFilter]||typeFilter;
 
-  const prompt=`Lista del usuario: ${listStr}
+  const seed=Math.floor(Math.random()*99999);
+  const eras=['clasicos 90s-2000s','estrenos 2022-2024','joyas poco conocidas pero muy buenas','mezcla de epocas'];
+  const genres=['accion/aventura','drama/suspenso','comedia','ciencia ficcion/fantasia','romance','terror/misterio','slice of life'];
+  const randomEra=eras[seed%eras.length];
+  const randomGenre=genres[Math.floor(seed/7)%genres.length];
 
-Recomienda 6 titulos DIFERENTES de ${typeHint}. Reglas:
-- Mood: ${currentMood?moodMap[currentMood]:'libre, sorprendeme con variedad'}
-- Prioriza continuaciones/temporadas siguientes de titulos en la lista
-- NO repitas ninguno de estos: ${exclude||'ninguno'}
-- Mezcla: algunos clasicos muy queridos (IMDB 8+), algunos populares o de moda ahora aunque tengan 7+, y alguna joya menos conocida pero muy bien valorada
-- Disponibles con subtitulos espanol latino en cualquier plataforma
-- Para libros: solo novelas de ficcion, NO manga ni comics
-- Varía los tipos si el filtro es all, no pongas todo del mismo tipo
-- Titulo mas conocido en Latinoamerica
+  const prompt=`[SEED:${seed}] Lista del usuario: ${listStr}
 
-SOLO JSON sin markdown, exactamente 6 items:
-[{"title":"Titulo","titleEn":"English/romaji title","type":"anime","reason":"Por que le gustara max 10 palabras","platform":"Netflix","score":"8.2/10","detail":"2 oraciones descripcion"}]`;
+Recomienda 6 titulos de ${typeHint}. REGLAS ESTRICTAS:
+1. Mood: ${currentMood?moodMap[currentMood]:'libre - maximo variedad'}
+2. Era esta vez: ${randomEra}
+3. Genero destacado esta vez: ${randomGenre}
+4. Prioriza continuaciones/temporadas de titulos ya en la lista
+5. PROHIBIDO incluir cualquier titulo de esta lista (ni parecidos): ${exclude||'ninguno'}
+6. Calidad: IMDB 6.5+ o muy popular/trending 2023-2024
+7. Los 6 titulos DEBEN ser de generos distintos entre si
+8. Incluye al menos 1 titulo trending o viral reciente
+9. Disponibles con subtitulos espanol en Netflix/HBO/Disney+/Amazon/Crunchyroll
+10. Solo novelas de ficcion para libros, NO manga
+11. Usa el titulo mas conocido en Latinoamerica
+
+SOLO JSON array, sin texto extra, exactamente 6 items:
+[{"title":"Titulo","titleEn":"English/romaji","type":"anime","reason":"Por que max 10 palabras","platform":"Netflix","score":"8.2/10","detail":"2 oraciones"}]`;
 
   try{
     let text='', attempts=0;
@@ -1160,7 +1169,8 @@ SOLO JSON sin markdown, exactamente 6 items:
       return!listNorm.some(l=>l===normEs||l===normEn||(normEn&&l.includes(normEn))||(normEs&&l.includes(normEs)));
     });
 
-    recHistory=[...new Set([...recHistory,...recs.map(r=>r.title)])].slice(-50);
+    sessionShownRecs=[...new Set([...sessionShownRecs,...recs.map(r=>r.title)])];
+        recHistory=[...new Set([...recHistory,...recs.map(r=>r.title)])].slice(-50);
     localStorage.setItem('recHistory',JSON.stringify(recHistory));
     loading.classList.remove('show');
     renderRecs(recs);
