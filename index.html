@@ -930,7 +930,7 @@ function render(){
             ${item.status==='pending'?`<button class="btn-sm blue" onclick="setStatus('${item.id}','watching')">Empezar</button>`:''}
             ${item.status==='watching'?`<button class="btn-sm" onclick="setStatus('${item.id}','pending')">Pendiente</button>`:''}
             ${item.status!=='done'?`<button class="btn-sm green" onclick="setStatus('${item.id}','done')">Terminado</button>`:''}
-            ${item.status==='done'?`<button class="btn-sm" onclick="setStatus('${item.id}','watching')">Reanudar</button>`:''}
+            ${item.status==='done'?`<button class="btn-sm" onclick="setStatus('${item.id}','watching')">Reanudar</button>`:''}            <button class="btn-sm" onclick="shareItem('${item.id}')">WA</button>
             <button class="btn-sm red" onclick="deleteItem('${item.id}')">Eliminar</button>
           </div>
           <div class="progress-fields">
@@ -957,6 +957,13 @@ function render(){
   // update view toggle button
   const vt=document.getElementById('viewToggle');
   if(vt)vt.textContent=compactView?'Normal':'Compacto';
+}
+
+function shareItem(id){
+  const item=items[id];if(!item)return;
+  const link='https://bitefren.github.io/share.html?id='+id+'&type=item';
+  const text=`Mira lo que tengo en mi lista: *${item.title}*\n\n${link}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
 function timeAgo(ts){
@@ -1242,7 +1249,7 @@ function renderOneRec(r,container){
         <div class="rec-vote">
           <button onclick="voteRec('${safetitle}',1,this)">+1</button>
           <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-          <button onclick="shareRec('${safetitle}','${safereason}')">WA</button>
+          <button onclick="shareRec('${safetitle}','${safereason}','${rtype}','${(r.platform||'').replace(/'/g,\"'\")  }','${r.score||''}','${(r.detail||'').replace(/'/g,\"'\")}' )">WA</button>
           ${r.detail?`<button onclick="this.closest('.rec-info').querySelector('.rec-why-text').classList.toggle('show')">...</button>`:''}
         </div>
       </div>
@@ -1254,8 +1261,16 @@ function renderOneRec(r,container){
 
 function toggleDetail(i){const el=document.getElementById('rec-detail-'+i);if(el)el.classList.toggle('show');}
 
-function shareRec(title,reason){
-  const text=`Mira esto: *${title}*\n_${reason}_\n\nhttps://bitefren.github.io/watchlist`;
+function shareRec(title,reason,type,platform,score,detail){
+  const base='https://bitefren.github.io/share.html';
+  const params=new URLSearchParams({
+    id:Date.now(),type:'rec',
+    title:title||'',t:type||'serie',
+    reason:reason||'',platform:platform||'',
+    score:score||'',detail:detail||''
+  });
+  const link=base+'?'+params.toString();
+  const text=`Te recomiendo: *${title}*\n_${reason}_\n\n${link}`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -1285,7 +1300,7 @@ function renderRecs(recs){
           <div class="rec-vote">
             <button onclick="voteRec('${safetitle}',1,this)">+1</button>
             <button onclick="voteRec('${safetitle}',-1,this)">-1</button>
-            <button onclick="shareRec('${safetitle}','${safereason}')">WA</button>
+            <button onclick="shareRec('${safetitle}','${safereason}','${rtype}','${(r.platform||'').replace(/'/g,\"'\")  }','${r.score||''}','${(r.detail||'').replace(/'/g,\"'\")}' )">WA</button>
             ${r.detail?`<button onclick="toggleDetail(${i})">...</button>`:''}
           </div>
         </div>
