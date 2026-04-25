@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Watchlist</title>
 <link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -1110,6 +1111,8 @@ SOLO JSON sin markdown, exactamente 6 items:
     const recs=JSON.parse(clean).map(r=>{
       const t=(r.type||'').toLowerCase().trim();
       r.type=validTypes.has(t)?t:(typeMap[t]||'serie');
+      // force type if filter is specific
+      if(typeFilter!=='all') r.type=typeFilter;
       return r;
     }).filter(r=>{
       const normEs=normalizeTitle(r.title);
