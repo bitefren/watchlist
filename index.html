@@ -132,7 +132,11 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .rec-why{font-size:11px;color:var(--muted);line-height:1.4}
 .rec-loading{text-align:center;color:var(--muted);font-size:14px;padding:2rem;display:none}
 .rec-loading.show{display:block}
-.rec-type-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+
+.rec-platform{font-size:11px;color:rgba(244,114,182,.7);margin-top:2px;margin-bottom:5px}
+.rec-add-btn{width:100%;padding:5px;background:linear-gradient(135deg,rgba(236,72,153,.2),rgba(244,114,182,.15));border:1px solid rgba(244,114,182,.3);border-radius:7px;color:#f9a8d4;font-size:12px;font-family:'Nunito',sans-serif;cursor:pointer;transition:all .15s;margin-top:4px}
+.rec-add-btn:hover{background:linear-gradient(135deg,rgba(236,72,153,.35),rgba(244,114,182,.25));color:#fff}
+
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 @media(max-width:600px){
@@ -768,15 +772,17 @@ async function getRecommendations(){
   const listStr=all.map(i=>`${i.title} (${i.type}${i.stars?', '+i.stars+'★':''}${i.status==='done'?' visto':''})`).join(', ');
   const typeHint=typeFilter==='all'?'cualquier tipo (series, películas, anime, k-dramas, libros)':`principalmente ${typeFilter}`;
   
-  const prompt=`Eres un experto en entretenimiento. Basándote en esta lista de una persona: ${listStr}
-  
-Recomienda exactamente 6 títulos de ${typeHint} que NO estén ya en la lista. Para cada uno da:
-- título en inglés o título original (importante: el título más conocido internacionalmente)
-- tipo: serie/pelicula/anime/kdrama/libro
-- una razón MUY corta (máx 12 palabras) de por qué le gustaría
+  const prompt=`Eres un experto en entretenimiento. Basándote en esta lista: ${listStr}
 
-Responde SOLO en JSON, sin markdown, así:
-[{"title":"Nombre","type":"anime","reason":"Porque te gustó X y tiene acción similar"}]`;
+Recomienda exactamente 6 títulos de ${typeHint} que cumplan TODOS estos criterios:
+- NO están ya en la lista
+- Son populares, bien valorados y reconocidos (IMDB 7+, MAL 7.5+ para anime, o muy populares)
+- Disponibles en español latino o con subtítulos en español en plataformas populares (Netflix, Crunchyroll, HBO, Disney+, Amazon, Spotify, etc)
+- Nada de contenido oscuro, desconocido o de baja calidad
+- Usa el título más conocido en Latinoamérica
+
+Responde SOLO en JSON sin markdown:
+[{"title":"Título conocido","type":"anime","reason":"Razón corta máx 10 palabras","platform":"Netflix"}]`;
 
   try{
     const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
@@ -832,6 +838,16 @@ async function fetchRecPoster(title,type){
 
 const recTypeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
 
+function addRecToList(title,type){
+  // Check not already in list
+  const exists=Object.values(items).some(i=>i.title.toLowerCase()===title.toLowerCase());
+  if(exists){showToast('Ya está en tu lista');return;}
+  const id=Date.now().toString();
+  ref.child(id).set({id,title,type,total:null,ep:0,min:0,status:'pending',addedBy:myName||'Anon',ts:id,stars:0,note:'',doneDate:null});
+  fetchPoster(title,type);
+  showToast('✓ Agregado a pendientes');
+}
+
 function renderRecs(recs){
   const grid=document.getElementById('recGrid');
   grid.innerHTML=recs.map((r,i)=>`
@@ -840,10 +856,11 @@ function renderRecs(recs){
       <div class="rec-info">
         <div class="rec-name">${r.title}</div>
         <div class="rec-why">${r.reason}</div>
+        ${r.platform?`<div class="rec-platform">${r.platform}</div>`:''}
+        <button class="rec-add-btn" onclick="addRecToList('${r.title.replace(/'/g,"\'")}','${r.type}')">+ Agregar</button>
       </div>
     </div>`).join('');
   
-  // fetch posters async
   recs.forEach((r,i)=>{
     fetchRecPoster(r.title,r.type).then(poster=>{
       if(poster){
