@@ -1103,7 +1103,10 @@ SOLO JSON sin markdown, exactamente 6 items:
     if(r.status===429)throw new Error('429');
     const d=await r.json();
     const text=d.choices?.[0]?.message?.content||'';
-    const clean=text.replace(/```json|```/g,'').trim();
+    // extract JSON array robustly
+    const jsonMatch=text.match(/\[[\s\S]*\]/);
+    if(!jsonMatch)throw new Error('no json');
+    const clean=jsonMatch[0];
     const validTypes=new Set(['serie','pelicula','anime','pelianime','kdrama','libro']);
     const typeMap={'movie':'pelicula','film':'pelicula','tv':'serie','series':'serie','k-drama':'kdrama','korean drama':'kdrama','anime movie':'pelianime','animated film':'pelianime','novel':'libro','book':'libro'};
     // Parse and filter out items already in list (compare normalized ES+EN titles)
