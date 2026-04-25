@@ -67,6 +67,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .badge.anime{background:rgba(236,72,153,.12);color:#ec4899;border:1px solid rgba(236,72,153,.25)}
 .badge.libro{background:rgba(249,168,212,.12);color:#f9a8d4;border:1px solid rgba(249,168,212,.3)}
 .badge.kdrama{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.3)}
+.badge.pelianime{background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.3)}
 .card-meta{font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
 .done-date{color:rgba(249,168,212,.6);font-size:12px}
 .stars-display{display:flex;gap:2px;margin-bottom:6px}
@@ -295,6 +296,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
       <button class="fbtn" onclick="setFilter('serie',this)">Series</button>
       <button class="fbtn" onclick="setFilter('pelicula',this)">Películas</button>
       <button class="fbtn" onclick="setFilter('anime',this)">Anime</button>
+      <button class="fbtn" onclick="setFilter('pelianime',this)">Peli Anime</button>
       <button class="fbtn" onclick="setFilter('libro',this)">Libros</button>
       <button class="fbtn" onclick="setFilter('kdrama',this)">K-Dramas</button>
     </div>
@@ -321,6 +323,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
         <option value="serie">📺 Series</option>
         <option value="pelicula">🎬 Películas</option>
         <option value="anime">⚡ Anime</option>
+        <option value="pelianime">🎌 Peli Anime</option>
         <option value="kdrama">🌸 K-Dramas</option>
         <option value="libro">📖 Libros</option>
       </select>
@@ -410,7 +413,7 @@ async function fetchPoster(title,type){
         render();
       }
     } else {
-      const mediaType=(type==='pelicula')?'movie':'tv';
+      const mediaType=(type==='pelicula'||type==='pelianime')?'movie':'tv';
       const r=await fetch(`https://api.themoviedb.org/3/search/${mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=en-US`);
       const d=await r.json();
       const poster=d.results?.[0]?.poster_path;
@@ -533,7 +536,7 @@ function setFilter(f,btn){
 
 const statusLbl={pending:'Pendiente',watching:'Viendo',done:'Terminado ✓'};
 const dotCls={pending:'dot-pending',watching:'dot-watching',done:'dot-done'};
-const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
+const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',pelianime:'🎌',libro:'📖',kdrama:'🌸'};
 
 function progressPct(item){
   if(!item.total)return 0;
@@ -568,7 +571,7 @@ function render(){
   if(filter==='pending') list=all.filter(i=>i.status==='pending');
   else if(filter==='watching') list=all.filter(i=>i.status==='watching');
   else if(filter==='done') list=all.filter(i=>i.status==='done');
-  else if(['serie','pelicula','anime','libro','kdrama'].includes(filter)) list=all.filter(i=>i.type===filter);
+  else if(['serie','pelicula','anime','pelianime','libro','kdrama'].includes(filter)) list=all.filter(i=>i.type===filter);
 
   const done=all.filter(i=>i.status==='done').length;
   const watching=all.filter(i=>i.status==='watching').length;
@@ -820,6 +823,7 @@ Recomienda 6 títulos de ${typeHint} con estas reglas ESTRICTAS:
 - NO incluyas estos títulos (ya vistos o rechazados): ${exclude||'ninguno'}
 - Solo títulos populares y bien valorados (IMDB 7.5+ o MAL 8+ para anime)
 - Solo libros de ficción/novelas, NO manga ni novelas gráficas para tipo "libro"
+- Para tipo "pelianime" recomienda SOLO películas de anime (Ghibli, Demon Slayer Movie, One Piece Film, etc)
 - Disponibles en Netflix, Crunchyroll, HBO, Disney+, Amazon o con subtítulos español latino
 - Usa el título más conocido en Latinoamérica
 - Varía los tipos si el filtro es "all"
@@ -864,13 +868,13 @@ async function fetchRecPoster(title,type){
       const cid=d.docs?.[0]?.cover_i;
       if(cid) recPosters[title]=`https://covers.openlibrary.org/b/id/${cid}-M.jpg`;
     } else {
-      const mt=type==='pelicula'?'movie':'tv';
+      const mt=(type==='pelicula'||type==='pelianime')?'movie':'tv';
       const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=en-US`);
       const d=await r.json();
       const poster=d.results?.[0]?.poster_path;
       if(poster) recPosters[title]='https://image.tmdb.org/t/p/w185'+poster;
       else{
-        const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${type==='pelicula'?'movie':'tvSeason'}&limit=1`);
+        const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${(type==='pelicula'||type==='pelianime')?'movie':'tvSeason'}&limit=1`);
         const id=await ir.json();
         const art=id.results?.[0]?.artworkUrl100;
         if(art) recPosters[title]=art.replace('100x100','300x300');
@@ -880,7 +884,7 @@ async function fetchRecPoster(title,type){
   return recPosters[title]||null;
 }
 
-const recTypeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
+const recTypeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',pelianime:'🎌',libro:'📖',kdrama:'🌸'};
 
 function addRecToList(title,type,btnEl){
   const exists=Object.values(items).some(i=>i.title.toLowerCase()===title.toLowerCase());
@@ -940,7 +944,7 @@ function renderRecs(recs){
           ${r.score?`<span class="rec-score">★ ${r.score}</span>`:''}
           ${r.platform?`<span class="rec-platform">${r.platform}</span>`:''}
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px">${r.reason||''}</div>
+        <div class="rec-reason">${r.reason||''}</div>
         ${r.detail?`<div class="rec-why-text" id="rec-detail-${i}">${r.detail}</div>`:''}
       </div>
     </div>`;
