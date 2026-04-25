@@ -944,10 +944,10 @@ function renderRecs(recs){
             ${inList?'✓ En lista':'+ Agregar'}
           </button>
           <div class="rec-vote">
-            <button onclick="voteRec('${safetitle}',1,this)">👍</button>
-            <button onclick="voteRec('${safetitle}',-1,this)">👎</button>
-            <button onclick="shareRec('${safetitle}','${safereason}')">💬</button>
-            ${r.detail?`<button onclick="toggleDetail(${i})">🔍</button>`:''}
+            <button onclick="voteRec('${safetitle}',1,this)" title="Me gusta">+1</button>
+            <button onclick="voteRec('${safetitle}',-1,this)" title="No me gusta">−1</button>
+            <button onclick="shareRec('${safetitle}','${safereason}')" title="Compartir">WA</button>
+            ${r.detail?`<button onclick="toggleDetail(${i})" title="Más info">...</button>`:''}
           </div>
         </div>
       </div>
