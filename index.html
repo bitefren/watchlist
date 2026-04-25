@@ -66,6 +66,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .badge.pelicula{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.25)}
 .badge.anime{background:rgba(236,72,153,.12);color:#ec4899;border:1px solid rgba(236,72,153,.25)}
 .badge.libro{background:rgba(249,168,212,.12);color:#f9a8d4;border:1px solid rgba(249,168,212,.3)}
+.badge.kdrama{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.3)}
 .card-meta{font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
 .done-date{color:rgba(249,168,212,.6);font-size:12px}
 .stars-display{display:flex;gap:2px;margin-bottom:6px}
@@ -109,6 +110,24 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
 .sug-info{flex:1;min-width:0}
 .sug-title{font-size:14px;color:#fff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sug-year{font-size:12px;color:var(--muted)}
+
+.rec-section{margin-top:2rem;animation:fadeUp .5s ease both}
+.rec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.rec-title{font-family:'Philosopher',serif;font-size:22px;font-weight:700;font-style:italic;color:#fce7f3}
+.btn-rec{padding:8px 18px;background:linear-gradient(135deg,#ec4899,#f472b6);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;font-family:'Nunito',sans-serif;cursor:pointer;transition:opacity .2s}
+.btn-rec:hover{opacity:.85}
+.btn-rec:disabled{opacity:.5;cursor:not-allowed}
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.rec-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;transition:transform .15s,border-color .2s;cursor:pointer}
+.rec-card:hover{transform:translateY(-3px);border-color:rgba(244,114,182,.4)}
+.rec-poster{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
+.rec-poster-ph{width:100%;aspect-ratio:2/3;background:rgba(255,150,180,.05);display:flex;align-items:center;justify-content:center;font-size:32px}
+.rec-info{padding:8px 10px}
+.rec-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;line-height:1.3}
+.rec-why{font-size:11px;color:var(--muted);line-height:1.4}
+.rec-loading{text-align:center;color:var(--muted);font-size:14px;padding:2rem;display:none}
+.rec-loading.show{display:block}
+.rec-type-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 @media(max-width:600px){
@@ -237,6 +256,7 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
       <option value="pelicula">🎬 Película</option>
       <option value="anime">⚡ Anime</option>
       <option value="libro">📖 Libro</option>
+      <option value="kdrama">🌸 K-Drama</option>
     </select>
     <button class="btn-add" onclick="addItem()">+ Agregar</button>
   </div>
@@ -260,11 +280,31 @@ header h1{font-family:'Philosopher',serif;font-size:clamp(46px,8vw,72px);font-we
     <button class="fbtn" onclick="setFilter('pelicula',this)">Películas</button>
     <button class="fbtn" onclick="setFilter('anime',this)">Anime</button>
     <button class="fbtn" onclick="setFilter('libro',this)">Libros</button>
+    <button class="fbtn" onclick="setFilter('kdrama',this)">K-Dramas</button>
   </div>
 
   <div class="stats" id="stats"></div>
   <div class="sync" id="syncStatus">Conectando...</div>
   <div id="list"></div>
+
+  <div class="rec-section" id="recSection" style="display:none">
+    <div class="rec-header">
+      <div class="rec-title">✨ Recomendaciones</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="sort-sel" id="recTypeFilter">
+          <option value="all">Todos los tipos</option>
+          <option value="serie">📺 Series</option>
+          <option value="pelicula">🎬 Películas</option>
+          <option value="anime">⚡ Anime</option>
+          <option value="kdrama">🌸 K-Dramas</option>
+          <option value="libro">📖 Libros</option>
+        </select>
+        <button class="btn-rec" id="btnRec" onclick="getRecommendations()">✦ Recomendar</button>
+      </div>
+    </div>
+    <div class="rec-loading" id="recLoading">✨ Analizando tu lista...</div>
+    <div class="rec-grid" id="recGrid"></div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -339,13 +379,25 @@ async function fetchPoster(title,type){
         render();
       }
     } else {
-      const mediaType=type==='pelicula'?'movie':'tv';
-      const r=await fetch(`https://api.themoviedb.org/3/search/${mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=es`);
+      const mediaType=(type==='pelicula')?'movie':'tv';
+      const r=await fetch(`https://api.themoviedb.org/3/search/${mediaType}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=en-US`);
       const d=await r.json();
       const poster=d.results?.[0]?.poster_path;
       if(poster){
         posterCache[title]='https://image.tmdb.org/t/p/w92'+poster;
         render();
+      } else {
+        // iTunes fallback
+        try{
+          const entity=type==='pelicula'?'movie':'tvSeason';
+          const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${entity}&limit=1`);
+          const id=await ir.json();
+          const art=id.results?.[0]?.artworkUrl100;
+          if(art){
+            posterCache[title]=art.replace('100x100','300x300');
+            render();
+          }
+        }catch(e2){}
       }
     }
   }catch(e){}
@@ -450,7 +502,7 @@ function setFilter(f,btn){
 
 const statusLbl={pending:'Pendiente',watching:'Viendo',done:'Terminado ✓'};
 const dotCls={pending:'dot-pending',watching:'dot-watching',done:'dot-done'};
-const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖'};
+const typeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
 
 function progressPct(item){
   if(!item.total)return 0;
@@ -485,7 +537,7 @@ function render(){
   if(filter==='pending') list=all.filter(i=>i.status==='pending');
   else if(filter==='watching') list=all.filter(i=>i.status==='watching');
   else if(filter==='done') list=all.filter(i=>i.status==='done');
-  else if(['serie','pelicula','anime','libro'].includes(filter)) list=all.filter(i=>i.type===filter);
+  else if(['serie','pelicula','anime','libro','kdrama'].includes(filter)) list=all.filter(i=>i.type===filter);
 
   const done=all.filter(i=>i.status==='done').length;
   const watching=all.filter(i=>i.status==='watching').length;
@@ -510,6 +562,7 @@ function render(){
   const isBook=i=>i.type==='libro';
   const isMovie=i=>i.type==='pelicula';
 
+  checkShowRec();
   document.getElementById('list').innerHTML=list.map((item,idx)=>{
     const pct=progressPct(item);
     const progLbl=progressLabel(item);
@@ -601,13 +654,18 @@ async function searchSuggestions(q){
       }));
     } else {
       // search both movie and tv, pick the right one based on type
-      const endpoints = type==='pelicula' ? ['movie'] : type==='anime' ? ['tv','movie'] : ['tv','movie'];
+      const endpoints = type==='pelicula' ? ['movie'] : type==='kdrama' ? ['tv'] : type==='anime' ? ['tv','movie'] : ['tv','movie'];
       let raw=[];
       for(const mt of endpoints){
         try{
-          const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=es&page=1`);
-          const d=await r.json();
-          raw=raw.concat((d.results||[]).map(x=>({
+          // fetch page 1 and 2 for more results, use en-US to get original titles
+          const [r1,r2]=await Promise.all([
+            fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=en-US&page=1`),
+            fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${enc}&language=en-US&page=2`)
+          ]);
+          const [d1,d2]=await Promise.all([r1.json(),r2.json()]);
+          const combined=[...(d1.results||[]),...(d2.results||[])];
+          raw=raw.concat(combined.map(x=>({
             title:x.title||x.name,
             year:(x.release_date||x.first_air_date||'').slice(0,4),
             poster:x.poster_path?'https://image.tmdb.org/t/p/w92'+x.poster_path:null,
@@ -616,14 +674,13 @@ async function searchSuggestions(q){
           })));
         }catch(e){}
       }
-      // deduplicate by title+year, sort by popularity
       const seen=new Set();
       raw.sort((a,b)=>b.pop-a.pop);
       results=raw.filter(x=>{
         const k=x.title+'|'+x.year;
         if(seen.has(k))return false;
         seen.add(k);return true;
-      }).slice(0,8);
+      }).slice(0,10);
     }
   }catch(e){return;}
 
@@ -656,6 +713,114 @@ document.getElementById('newType')?.addEventListener('change',()=>{
   const q=document.getElementById('newTitle').value.trim();
   if(q.length>=2) searchSuggestions(q);
 });
+
+
+const GEMINI_KEY='AIzaSyAmdlDL23is33EdIQRSAro8Dl418qDW4vI';
+let recPosters={};
+
+// Show rec section once items load
+function checkShowRec(){
+  const all=Object.values(items);
+  document.getElementById('recSection').style.display=all.length>=2?'block':'none';
+}
+
+async function getRecommendations(){
+  const all=Object.values(items);
+  if(all.length<2){showToast('Agrega más títulos primero');return;}
+  
+  const btn=document.getElementById('btnRec');
+  const loading=document.getElementById('recLoading');
+  const grid=document.getElementById('recGrid');
+  
+  btn.disabled=true; btn.textContent='...';
+  loading.classList.add('show'); grid.innerHTML='';
+
+  const typeFilter=document.getElementById('recTypeFilter').value;
+  
+  // Build compact list for prompt
+  const listStr=all.map(i=>`${i.title} (${i.type}${i.stars?', '+i.stars+'★':''}${i.status==='done'?' visto':''})`).join(', ');
+  const typeHint=typeFilter==='all'?'cualquier tipo (series, películas, anime, k-dramas, libros)':`principalmente ${typeFilter}`;
+  
+  const prompt=`Eres un experto en entretenimiento. Basándote en esta lista de una persona: ${listStr}
+  
+Recomienda exactamente 6 títulos de ${typeHint} que NO estén ya en la lista. Para cada uno da:
+- título en inglés o título original (importante: el título más conocido internacionalmente)
+- tipo: serie/pelicula/anime/kdrama/libro
+- una razón MUY corta (máx 12 palabras) de por qué le gustaría
+
+Responde SOLO en JSON, sin markdown, así:
+[{"title":"Nombre","type":"anime","reason":"Porque te gustó X y tiene acción similar"}]`;
+
+  try{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:600}})
+    });
+    const d=await r.json();
+    const text=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const recs=JSON.parse(clean);
+    
+    loading.classList.remove('show');
+    renderRecs(recs);
+  }catch(e){
+    loading.classList.remove('show');
+    showToast('Error al obtener recomendaciones, intenta de nuevo');
+  }
+  btn.disabled=false; btn.textContent='✦ Recomendar';
+}
+
+async function fetchRecPoster(title,type){
+  if(recPosters[title]!==undefined) return recPosters[title];
+  recPosters[title]=null;
+  try{
+    const q=encodeURIComponent(title);
+    if(type==='libro'){
+      const r=await fetch(`https://openlibrary.org/search.json?title=${q}&limit=1&fields=cover_i`);
+      const d=await r.json();
+      const cid=d.docs?.[0]?.cover_i;
+      if(cid) recPosters[title]=`https://covers.openlibrary.org/b/id/${cid}-M.jpg`;
+    } else {
+      const mt=(type==='pelicula')?'movie':'tv';
+      const r=await fetch(`https://api.themoviedb.org/3/search/${mt}?api_key=648178e349ec83cbabf8e5f055a8fd8b&query=${q}&language=en-US`);
+      const d=await r.json();
+      const poster=d.results?.[0]?.poster_path;
+      if(poster) recPosters[title]='https://image.tmdb.org/t/p/w185'+poster;
+      else {
+        const ir=await fetch(`https://itunes.apple.com/search?term=${q}&entity=${type==='pelicula'?'movie':'tvSeason'}&limit=1`);
+        const id=await ir.json();
+        const art=id.results?.[0]?.artworkUrl100;
+        if(art) recPosters[title]=art.replace('100x100','300x300');
+      }
+    }
+  }catch(e){}
+  return recPosters[title]||null;
+}
+
+const recTypeEmoji={serie:'📺',pelicula:'🎬',anime:'⚡',libro:'📖',kdrama:'🌸'};
+
+function renderRecs(recs){
+  const grid=document.getElementById('recGrid');
+  grid.innerHTML=recs.map((r,i)=>`
+    <div class="rec-card" id="rec-${i}">
+      <div class="rec-poster-ph" id="rec-ph-${i}">${recTypeEmoji[r.type]||'🎬'}</div>
+      <div class="rec-info">
+        <div class="rec-name">${r.title}</div>
+        <div class="rec-why">${r.reason}</div>
+      </div>
+    </div>`).join('');
+  
+  // fetch posters async
+  recs.forEach((r,i)=>{
+    fetchRecPoster(r.title,r.type).then(poster=>{
+      if(poster){
+        const ph=document.getElementById('rec-ph-'+i);
+        if(ph) ph.outerHTML=`<img class="rec-poster" src="${poster}" loading="lazy" onerror="this.style.display='none'">`;
+      }
+    });
+  });
+}
 
 document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){document.getElementById('suggestions').style.display='none';addItem();}});
 </script>
